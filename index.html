@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#020307" />
+    <meta
+      name="description"
+      content="Joy In is a creative developer building atmospheric, accessible digital experiences where interaction, motion, and code meet."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Joying" />
+    <meta
+      property="og:description"
+      content="A guided digital gallery of selected education, work, projects, and skills."
+    />
+    <meta property="og:image" content="https://portfolio.example/assets/og-card.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Joying Digital Portfolio</title>
+    <link rel="canonical" href="https://portfolio.example/" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Joying",
+        "jobTitle": "Creative Developer",
+        "description": "Creative developer focused on accessible, atmospheric digital experiences."
+      }
+    </script>
+  </head>
+  <body data-state="gate" data-mode="3d" data-active="education">
+    <a class="skip-link" href="#portfolio-main">Skip to portfolio content</a>
+
+    <canvas id="scene" class="scene" aria-hidden="true" tabindex="-1"></canvas>
+    <div class="atmosphere" aria-hidden="true">
+      <span class="atmosphere__glow atmosphere__glow--a"></span>
+      <span class="atmosphere__glow atmosphere__glow--b"></span>
+    </div>
+
+    <section class="entry-gate" id="entry-gate" aria-labelledby="gate-title">
+      <div class="gate-orbit" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="gate-copy">
+        <p class="eyebrow"><span class="signal-dot"></span> Digital portfolio / 2026</p>
+        <h1 id="gate-title" class="wordmark" aria-label="Joying">JOYING</h1>
+        <p class="gate-role">Creative developer &amp; systems thinker</p>
+        <p class="gate-statement">
+          I build thoughtful digital spaces where interaction, motion, and code meet.
+        </p>
+        <div class="gate-actions">
+          <button class="action action--primary" id="enter-button" type="button">
+            <span>Enter gallery</span><span aria-hidden="true">→</span>
+          </button>
+          <button class="text-action" id="skip-2d-button" type="button">Skip intro / use 2D</button>
+        </div>
+        <p class="capability-note" id="capability-note" role="status">
+          <span aria-hidden="true">SYS</span> Preparing spatial layer
+        </p>
+      </div>
+      <div class="gate-index" aria-hidden="true">
+        <span>01 — 04</span>
+        <span>EDU / WRK / PRJ / SKL</span>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="noscript-note">JavaScript is off. The complete portfolio is presented in its accessible linear form.</p>
+    </noscript>
+
+    <div class="experience" id="experience">
+      <header class="identity-hud">
+        <a class="mini-wordmark" href="index.html" aria-label="Return to entry">JOYING</a>
+        <div class="identity-copy">
+          <p>Software Engineer</p>
+          <p>Designing calm systems<br />for curious humans.</p>
+        </div>
+      </header>
+
+      <nav class="section-nav" aria-label="Portfolio sections">
+        <p class="nav-label">Index / 04</p>
+        <ol>
+          <li>
+            <a href="#education" data-section-link="education">
+              <span class="nav-arrow" aria-hidden="true">›</span><span class="nav-number">01</span><span>Education</span>
+            </a>
+          </li>
+          <li>
+            <a href="#work" data-section-link="work">
+              <span class="nav-arrow" aria-hidden="true">›</span><span class="nav-number">02</span><span>Work</span>
+            </a>
+          </li>
+          <li>
+            <a href="#projects" data-section-link="projects">
+              <span class="nav-arrow" aria-hidden="true">›</span><span class="nav-number">03</span><span>Projects</span>
+            </a>
+          </li>
+          <li>
+            <a href="#skills" data-section-link="skills">
+              <span class="nav-arrow" aria-hidden="true">›</span><span class="nav-number">04</span><span>Skills</span>
+            </a>
+          </li>
+        </ol>
+        <div class="nav-status" aria-hidden="true">
+          <p>Status</p>
+          <strong>Keep exploring.</strong>
+          <div class="portal-mini"><span></span></div>
+        </div>
+      </nav>
+
+      <div class="system-status" aria-hidden="true">
+        <span id="system-clock">00:00:00</span>
+        <span>LVL <b id="level-number">01</b></span>
+      </div>
+
+      <main class="portfolio-main" id="portfolio-main" tabindex="-1">
+        <h1 class="sr-only" id="view-title">Joying — Portfolio</h1>
+
+        <section class="content-panel content-panel--paged is-active" id="education" data-section="education" aria-labelledby="education-title">
+          <span class="corner corner--tl" aria-hidden="true"></span>
+          <span class="corner corner--tr" aria-hidden="true"></span>
+          <span class="corner corner--bl" aria-hidden="true"></span>
+          <span class="corner corner--br" aria-hidden="true"></span>
+          <div class="panel-teaser" aria-hidden="true">
+            <p><span>01 / 04</span><span>ORIGIN_POINT</span></p>
+            <strong>Education</strong>
+            <span>Computer science and digital craft</span>
+            <i>Approach <b>→</b></i>
+          </div>
+          <div class="panel-scroll">
+            <div class="panel-header">
+              <p class="panel-index">01 / 04 <span>Education</span></p>
+              <div class="panel-header-tools">
+                <p class="panel-page-count">Page <strong id="education-page-count">01 / 02</strong></p>
+                <p class="panel-code" aria-hidden="true">EDU_001</p>
+              </div>
+            </div>
+            <!-- <p class="section-kicker">Education</p> -->
+            <!-- <h2 id="education-title" tabindex="-1">Education<br /> -->
+              <!-- <em>&amp; digital craft</em> -->
+            </h2>
+            <div class="section-page-stage education-page-stage" id="education-page-stage">
+              <article class="section-page education-page is-selected" data-education-page-index="0" data-page-label="Education overview">
+                <h3 class="sr-only">Education overview</h3>
+                <div class="education-meta education-meta--logo-left">
+                  <div class="education-logo-slot" aria-hidden="true">
+                    <img src="assets/cal_logo.png" width="500" height="398" alt="" />
+                  </div>
+                  <div class="education-meta__details">
+                    <div>
+                      <span>Institution</span>
+                      <strong>University of California, Berkeley</strong>
+                    </div>
+                    <div>
+                      <span>Program</span>
+                      <strong>B.A. Computer Science</strong>
+                    </div>
+                    <div>
+                      <span>GPA</span>
+                      <strong>3.5</strong>
+                    </div>
+                    <div>
+                      <span>Timeline</span>
+                      <strong>2021 — 2025</strong>
+                    </div>
+                    <div>
+                      <span>Location</span>
+                      <strong>California, USA</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="education-meta education-meta--logo-right">
+                  <div class="education-meta__details">
+                    <div>
+                      <span>Institution</span>
+                      <strong>Peking University</strong>
+                    </div>
+                    <div>
+                      <span>Program</span>
+                      <strong>International Exchange Student</strong>
+                    </div>
+                    <div>
+                      <span>Timeline</span>
+                      <strong>Spring 2025</strong>
+                    </div>
+                    <div>
+                      <span>Location</span>
+                      <strong>Beijing, China</strong>
+                    </div>
+                  </div>
+                  <div class="education-logo-slot" aria-hidden="true">
+                    <img src="assets/Peking-University-logo.png" width="2048" height="2048" alt="" />
+                  </div>
+                </div>
+                <div class="tag-region">
+                  <p>Selected coursework</p>
+                  <ul class="tags" aria-label="Selected coursework">
+                    <li>Operating Systems & Systems Programming</li><li>Database Systems</li><li>Natural Language Programming</li>
+                    <li>Programming Languages and Compilers</li><li>Internet Architecture & Protocols</li><li>Computer Architecture</li>
+                    <li>Efficient Algorithms & Intractable Problems</li><li>Computer Security</li><li>Artificial Intelligence</li>
+                    <li>Data Structures & Algorithms</li><li>Structure & Interpretation of Computer Programs</li><li>Designing Information Systems</li>
+                    <li>Principles & Techniques of Data Science</li>
+                  </ul>
+                </div>
+                <div class="tag-region">
+                  <p>Organizations</p>
+                  <ul class="tags" aria-label="Organizations">
+                    <li>Society of Women Engineers</li><li>Plextech @ Berkeley</li><li>WebDev @ Berkeley</li>
+                  </ul>
+                </div>
+                <!-- <ul class="signal-list">
+                  <li>Explored accessible interfaces and creative computing through project-led study.</li>
+                  <li>Led small teams from rough questions to tested, documented prototypes.</li>
+                  <li>Built a practice around making complex systems feel calm and understandable.</li>
+                </ul> -->
+              </article>
+            </div>
+<!-- 
+            <div class="nested-controls section-page-controls education-page-controls" role="group" aria-label="Browse Education pages">
+              <button type="button" data-education-page-action="previous" aria-label="Previous Education page" title="Previous Education page" disabled><span aria-hidden="true">←</span><span class="section-page-control-label">Previous page</span></button>
+              <button type="button" data-education-page-action="next" aria-label="Next Education page" title="Next Education page"><span class="section-page-control-label">Next page</span><span aria-hidden="true">→</span></button>
+            </div> -->
+          </div>
+        </section>
+
+        <section class="content-panel content-panel--paged" id="work" data-section="work" aria-labelledby="work-title" hidden>
+          <span class="corner corner--tl" aria-hidden="true"></span>
+          <span class="corner corner--tr" aria-hidden="true"></span>
+          <span class="corner corner--bl" aria-hidden="true"></span>
+          <span class="corner corner--br" aria-hidden="true"></span>
+          <div class="panel-teaser" aria-hidden="true">
+            <p><span>02 / 04</span><span>Work Experience</span></p>
+            <strong>Work</strong>
+            <span>Useful things, built carefully</span>
+            <i>Approach <b>→</b></i>
+          </div>
+          <div class="panel-scroll">
+            <div class="panel-header">
+              <p class="panel-index">02 / 04 <span>Work Experience</span></p>
+              <div class="panel-header-tools">
+                <p class="panel-page-count">Page <strong id="work-page-count">01 / 01</strong></p>
+                <p class="panel-code" aria-hidden="true">WRK_003</p>
+              </div>
+            </div>
+            <!-- <h2 id="work-title" tabindex="-1">Work Experience</h2> -->
+
+            <div class="section-page-stage work-timeline-stage" id="work-timeline">
+              <article class="section-page work-timeline-page is-selected" aria-label="Work experience route">
+                <p class="work-timeline__instruction"><span>Route // 2022—Now</span><span>Select a beacon to inspect a field record or send a suggestion.</span></p>
+
+                <div class="work-timeline__artboard">
+                  <img class="work-timeline__road" src="assets/road_flagged.png" width="2172" height="724" alt="" aria-hidden="true" />
+                  <div class="work-timeline__kirbs-track" aria-hidden="true">
+                    <div class="work-timeline__kirbs-runner">
+                      <img class="work-timeline__kirbs" src="assets/kirbs-animated.gif" width="512" height="512" alt="" draggable="false" decoding="async" />
+                    </div>
+                  </div>
+
+                  <ol class="work-timeline__stops" aria-label="Work experience timeline and suggestions contact">
+                    <li class="work-stop work-stop--tesla" data-work-stop data-work-company="Tesla">
+                      <button class="work-stop__trigger" id="work-stop-tesla-trigger" type="button" data-work-stop-trigger aria-expanded="false" aria-controls="work-stop-tesla-panel">
+                        <span class="work-stop__action" aria-hidden="true">+</span>
+                      </button>
+                      <section class="work-stop__panel" id="work-stop-tesla-panel" data-work-stop-panel role="region" aria-labelledby="work-stop-tesla-title">
+                        <button class="work-stop__close" type="button" data-work-stop-close aria-label="Close Tesla experience details"><span aria-hidden="true">×</span></button>
+                        <div class="work-stop__heading">
+                          <img src="assets/tesla_logo.png" width="1600" height="1600" alt="" />
+                          <div><p>01 // Field record</p><h3 id="work-stop-tesla-title">Tesla</h3></div>
+                        </div>
+                        <p class="work-stop__role">Software Engineering Intern</p>
+                        <p class="work-stop__time"><time datetime="2022-06">Summer 2022</time><span>Reno, NV</span></p>
+                        <p class="work-stop__summary">Experience: 5/5. Elon sightings: 0.</p>
+                      </section>
+                    </li>
+
+                    <li class="work-stop work-stop--apple" data-work-stop data-work-company="Apple">
+                      <button class="work-stop__trigger" id="work-stop-apple-trigger" type="button" data-work-stop-trigger aria-expanded="false" aria-controls="work-stop-apple-panel">
+                        <span class="work-stop__action" aria-hidden="true">+</span>
+                      </button>
+                      <section class="work-stop__panel" id="work-stop-apple-panel" data-work-stop-panel role="region" aria-labelledby="work-stop-apple-title">
+                        <button class="work-stop__close" type="button" data-work-stop-close aria-label="Close Apple experience details"><span aria-hidden="true">×</span></button>
+                        <div class="work-stop__heading">
+                          <img src="assets/apple_logo.png" width="568" height="675" alt="" />
+                          <div><p>02 // Field record</p><h3 id="work-stop-apple-title">Apple</h3></div>
+                        </div>
+                        <p class="work-stop__role">Software Engineering Intern</p>
+                        <p class="work-stop__time"><span><time datetime="2023-06">Summer 2023</time> + <time datetime="2024-06">2024</time></span><span>Cupertino, CA</span></p>
+                        <p class="work-stop__summary">Xcode engineering, pre-Claude.</p>
+                      </section>
+                    </li>
+
+                    <li class="work-stop work-stop--meta" data-work-stop data-work-company="Meta">
+                      <button class="work-stop__trigger" id="work-stop-meta-trigger" type="button" data-work-stop-trigger aria-expanded="false" aria-controls="work-stop-meta-panel">
+                        <span class="work-stop__action" aria-hidden="true">+</span>
+                      </button>
+                      <section class="work-stop__panel" id="work-stop-meta-panel" data-work-stop-panel role="region" aria-labelledby="work-stop-meta-title">
+                        <button class="work-stop__close" type="button" data-work-stop-close aria-label="Close Meta experience details"><span aria-hidden="true">×</span></button>
+                        <div class="work-stop__heading">
+                          <img src="assets/meta_logo.png" width="1567" height="1041" alt="" />
+                          <div><p>03 // Field record</p><h3 id="work-stop-meta-title">Meta</h3></div>
+                        </div>
+                        <p class="work-stop__role">Software Engineer · Instagram Stories</p>
+                        <p class="work-stop__time"><span><time datetime="2025-08">Aug 2025</time>—Present</span><span>Menlo Park, CA</span></p>
+                        <p class="work-stop__summary">Mobile development beast, raised by Claude.</p>
+                      </section>
+                    </li>
+
+                    <li class="work-stop work-stop--suggestions" data-work-stop data-work-company="Suggestions" data-work-label="suggestions and email contact">
+                      <button class="work-stop__trigger" id="work-stop-suggestions-trigger" type="button" data-work-stop-trigger aria-expanded="false" aria-controls="work-stop-suggestions-panel">
+                        <span class="work-stop__action" aria-hidden="true">+</span>
+                      </button>
+                      <section class="work-stop__panel" id="work-stop-suggestions-panel" data-work-stop-panel role="region" aria-labelledby="work-stop-suggestions-title">
+                        <button class="work-stop__close" type="button" data-work-stop-close aria-label="Close suggestions and email contact"><span aria-hidden="true">×</span></button>
+                        <div class="work-stop__heading work-stop__heading--contact">
+                          <div><p>04 // Open channel</p><h3 id="work-stop-suggestions-title">Suggestions?</h3></div>
+                        </div>
+                        <a class="work-stop__email" href="mailto:hello@example.com"><span>Email.</span><span aria-hidden="true">→</span></a>
+                      </section>
+                    </li>
+                  </ol>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-panel content-panel--project content-panel--paged" id="projects" data-section="projects" aria-labelledby="projects-title" hidden>
+          <span class="corner corner--tl" aria-hidden="true"></span>
+          <span class="corner corner--tr" aria-hidden="true"></span>
+          <span class="corner corner--bl" aria-hidden="true"></span>
+          <span class="corner corner--br" aria-hidden="true"></span>
+          <div class="panel-teaser" aria-hidden="true">
+            <p><span>03 / 04</span><span>SYSTEM_ARCHIVE</span></p>
+            <strong>Projects</strong>
+            <span>Selected interfaces and spatial systems</span>
+            <i>Approach <b>→</b></i>
+          </div>
+          <div class="panel-scroll">
+            <div class="panel-header">
+              <p class="panel-index">03 / 04 <span>Projects</span></p>
+              <div class="panel-header-tools">
+                <p class="panel-page-count">Page <strong id="project-index">01 / 02</strong></p>
+                <p class="panel-code" aria-hidden="true">PRJ_ACTIVE</p>
+              </div>
+            </div>
+            <!-- <p class="section-kicker">Projects</p> -->
+            <!-- <h2 id="projects-title" class="sr-only" tabindex="-1">Selected projects</h2> -->
+
+            <div class="section-page-stage project-stage" id="project-stage">
+              <div class="section-page project-page is-selected" data-project-page-index="0" data-page-label="Flexcar, PintOS, and Prove">
+                <div class="project-card-grid project-card-grid--mosaic" aria-label="Projects from 2024 to 2022">
+                  <article class="project-card project-card--flip project-card--feature project-card--flexcar project-card--wordmark" data-project-card data-project="flexcar" data-project-title="Flexcar">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-flexcar-back" aria-label="Show technical details for Flexcar"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-flexcar-front">
+                        <p class="project-card__eyebrow"><span>01 // Product system</span><time datetime="2024">2024</time></p>
+                        <div class="project-card__mark project-card__mark--image project-card__mark--wordmark" aria-hidden="true">
+                          <img src="assets/flexcar_logo.png" alt="" width="650" height="340" decoding="async" />
+                        </div>
+                        <div class="project-card__copy">
+                          <h3 class="sr-only" tabindex="-1">Flexcar</h3>
+                          <ul class="project-card__tech" aria-label="Flexcar skills">
+                            <li>PostgreSQL</li><li>Java Spring</li><li>TypeScript</li><li>React Native</li><li>Docker</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-flexcar-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>FLC_01</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>Service orchestration</h3>
+                          <p>One service workspace connecting vehicle reports, prioritized tasks, and repair details.</p>
+                          <ul class="project-card__bullets" aria-label="Flexcar resume highlights">
+                            <li>Designed a PostgreSQL relational schema connecting task and vehicle entities through vehicle IDs, supporting efficient priority-based task filtering and sorting.</li>
+                            <li>Developed a Java Spring backend that automatically generated tasks from report data and exposed controller-based API endpoints for application data access.</li>
+                            <li>Built a TypeScript and React Native frontend with database-backed task views, and containerized mock PostgreSQL environments with Docker for integration testing.</li>
+                          </ul>
+                        </div>
+                        <a class="project-card__external" href="https://www.flexcar.com/" target="_blank" rel="noopener noreferrer">Visit Flexcar <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project-card project-card--flip project-card--compact project-card--pintos" data-project-card data-project="pintos" data-project-title="PintOS">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-pintos-back" aria-label="Show technical details for PintOS"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-pintos-front">
+                        <p class="project-card__eyebrow"><span>02 // Operating systems</span><time datetime="2024">2024</time></p>
+                        <div class="project-card__mark project-card__mark--image" aria-hidden="true">
+                          <img src="assets/pintos_logo.png" alt="" width="624" height="674" decoding="async" />
+                        </div>
+                        <div class="project-card__copy">
+                          <h3 tabindex="-1">PintOS</h3>
+                          <ul class="project-card__tech" aria-label="PintOS skills">
+                            <li>x86</li><li>Operating systems</li><li>Multithreading</li><li>System calls</li><li>File systems</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-pintos-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>PNT_02</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>x86 operating system</h3>
+                          <p>An x86 operating system supporting multithreading, user programs, scheduling, system calls, and a Unix-style file system.</p>
+                          <ul class="project-card__bullets" aria-label="PintOS resume highlights">
+                            <li>Designed and developed an x86 operating system with support for multithreading, user program loading and execution, and a Unix file system.</li>
+                            <li>Implemented system calls for process control and file systems, floating-point operations, strict-priority scheduling, efficient thread sleeping, process synchronization and multithreading support, a buffer cache, and on-disk inodes.</li>
+                          </ul>
+                        </div>
+                        <span class="project-card__external project-card__external--placeholder" aria-label="PintOS project link not yet added">Project link pending <span aria-hidden="true">↗</span></span>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project-card project-card--flip project-card--compact project-card--prove project-card--wordmark" data-project-card data-project="prove" data-project-title="Prove">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-prove-back" aria-label="Show technical details for Prove"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-prove-front">
+                        <p class="project-card__eyebrow"><span>03 // Data platform</span><time datetime="2022">2022</time></p>
+                        <div class="project-card__mark project-card__mark--image project-card__mark--wordmark" aria-hidden="true">
+                          <img src="assets/prove_logo.png" alt="" width="1200" height="630" decoding="async" />
+                        </div>
+                        <div class="project-card__copy">
+                          <h3 class="sr-only" tabindex="-1">Prove</h3>
+                          <ul class="project-card__tech" aria-label="Prove skills">
+                            <li>Kafka</li><li>Anomaly detection</li><li>Statistical modeling</li><li>Streaming analytics</li><li>Full-stack</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-prove-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>PRV_03</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>Anomaly detection</h3>
+                          <p>Real-time identity traffic monitoring designed to surface anomalous authentication events sooner.</p>
+                          <ul class="project-card__bullets" aria-label="Prove resume highlights">
+                            <li>Built a full-stack anomaly detection dashboard to monitor and alert on changes to production traffic in Kafka.</li>
+                            <li>Reduced authentication warning time from several days to a few hours by applying statistical and mathematical models to streamed data to detect anomalous events.</li>
+                          </ul>
+                        </div>
+                        <a class="project-card__external" href="https://www.prove.com/" target="_blank" rel="noopener noreferrer">Visit Prove <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <div class="section-page project-page" data-project-page-index="1" data-page-label="Tailorbird, League Predictor, Music Generation, and a 2019 project">
+                <div class="project-card-grid project-card-grid--mosaic project-card-grid--four" aria-label="Projects from 2021 to 2019">
+                  <article class="project-card project-card--flip project-card--feature project-card--tailorbird" data-project-card data-project="tailorbird" data-project-title="Tailorbird">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-tailorbird-back" aria-label="Show technical details for Tailorbird"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-tailorbird-front">
+                        <p class="project-card__eyebrow"><span>04 // Applied AI</span><time datetime="2021">2021</time></p>
+                        <div class="project-card__mark" aria-hidden="true"><span>TB</span></div>
+                        <div class="project-card__copy">
+                          <h3 tabindex="-1">Tailorbird</h3>
+                          <ul class="project-card__tech" aria-label="Tailorbird skills">
+                            <li>GraphQL</li><li>React</li><li>Python</li><li>Tesseract OCR</li><li>OpenCV</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-tailorbird-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>TLB_04</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>Inspection pipeline</h3>
+                          <p>An AI-assisted property inspection workflow for faster, more consistent furniture assessments.</p>
+                          <ul class="project-card__bullets" aria-label="Tailorbird resume highlights">
+                            <li>Reduced contractor workload by writing app backend with GraphQL &amp; React to automatically assess furniture.</li>
+                            <li>Wrote a Python algorithm to extract text from images with optical character recognition through Tesseract.</li>
+                            <li>Implemented image processing with OpenCV-Python to achieve a 90+% accuracy rate on the text-extraction algorithm.</li>
+                          </ul>
+                        </div>
+                        <a class="project-card__external" href="https://www.tailorbird.com/" target="_blank" rel="noopener noreferrer">Visit Tailorbird <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project-card project-card--flip project-card--compact project-card--league" data-project-card data-project="league-predictor" data-project-title="League Predictor">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-league-predictor-back" aria-label="Show technical details for League Predictor"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-league-predictor-front">
+                        <p class="project-card__eyebrow"><span>05 // Predictive modeling</span><time datetime="2020">2020</time></p>
+                        <div class="project-card__mark project-card__mark--image" aria-hidden="true">
+                          <img src="assets/league_logo.png" alt="" width="320" height="320" decoding="async" />
+                        </div>
+                        <div class="project-card__copy">
+                          <h3 tabindex="-1">League Predictor</h3>
+                          <ul class="project-card__tech" aria-label="League Predictor skills">
+                            <li>Logistic regression</li><li>Classification</li><li>Machine learning</li><li>Match-state modeling</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-league-predictor-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>LGP_05</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>Match outcome prediction</h3>
+                          <p>A match-state classification model predicting League of Legends outcomes from the first ten minutes of play.</p>
+                          <ul class="project-card__bullets" aria-label="League Predictor resume highlights">
+                            <li>Predicted outcomes of League of Legends matches from each match's state at 10 minutes.</li>
+                            <li>Used logistic regression and other classifiers to build a learning model that achieved a 73% accuracy rate.</li>
+                          </ul>
+                        </div>
+                        <span class="project-card__external project-card__external--placeholder" aria-label="League Predictor project link not yet added">Project link pending <span aria-hidden="true">↗</span></span>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project-card project-card--flip project-card--compact project-card--music" data-project-card data-project="music-generation" data-project-title="Music Generation">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-music-generation-back" aria-label="Show technical details for Music Generation"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-music-generation-front">
+                        <p class="project-card__eyebrow"><span>06 // Generative audio</span><time datetime="2020">2020</time></p>
+                        <div class="project-card__mark project-card__mark--image" aria-hidden="true">
+                          <img src="assets/orca_logo.png" alt="" width="1000" height="1000" decoding="async" />
+                        </div>
+                        <div class="project-card__copy">
+                          <h3 tabindex="-1">Music Generation</h3>
+                          <ul class="project-card__tech" aria-label="Music Generation skills">
+                            <li>Rust</li><li>Orca</li><li>Genetic algorithms</li><li>Computational creativity</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-music-generation-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>MUS_06</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>Algorithmic music generation</h3>
+                          <p>A generative-music system using genetic algorithms, Rust, and Orca to explore computational creativity.</p>
+                          <ul class="project-card__bullets" aria-label="Music Generation resume highlights">
+                            <li>Researched applications of genetic algorithms for computational creativity, then used Rust and Orca to design and program an algorithm that composes music.</li>
+                          </ul>
+                        </div>
+                        <span class="project-card__external project-card__external--placeholder" aria-label="Music Generation project link not yet added">Project link pending <span aria-hidden="true">↗</span></span>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project-card project-card--flip project-card--compact project-card--placeholder" data-project-card data-project="project-placeholder-2019" data-project-title="2019 project placeholder">
+                    <button class="project-card__flip-toggle" type="button" data-project-flip aria-expanded="false" aria-controls="project-placeholder-2019-back" aria-label="Show technical details for the 2019 project placeholder"><span data-project-flip-copy aria-hidden="true">Details</span><span aria-hidden="true">↻</span></button>
+                    <div class="project-card__surface">
+                      <div class="project-card__face project-card__face--front" id="project-placeholder-2019-front">
+                        <p class="project-card__eyebrow"><span>07 // Project category</span><time datetime="2019">2019</time></p>
+                        <div class="project-card__mark" aria-hidden="true"><span>P7</span></div>
+                        <div class="project-card__copy">
+                          <h3 tabindex="-1">More to Come</h3>
+                          <ul class="project-card__tech" aria-label="2019 project placeholder skills">
+                            <li>Technology</li><li>Method</li><li>Outcome</li>
+                          </ul>
+                        </div>
+                        <p class="project-card__prompt"><span>Hover or select</span><span aria-hidden="true">↻</span></p>
+                      </div>
+                      <div class="project-card__face project-card__face--back" id="project-placeholder-2019-back">
+                        <p class="project-card__eyebrow"><span>Technical file</span><span>PRJ_07</span></p>
+                        <div class="project-card__back-copy">
+                          <h3>Technical focus</h3>
+                          <p>Have an idea? Reach out.</p>
+                          <ul class="project-card__bullets" aria-label="2019 project placeholder resume highlights">
+                            <li>Replace this with an accomplishment that names the technology or method used.</li>
+                            <li>Add a result, measurement, or implementation detail here.</li>
+                          </ul>
+                        </div>
+                        <span class="project-card__external project-card__external--placeholder" aria-label="2019 project link not yet added">Project link pending <span aria-hidden="true">↗</span></span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <div class="nested-controls section-page-controls project-page-controls" role="group" aria-label="Browse project pages">
+              <button type="button" data-project-action="previous" aria-label="Previous project page" title="Previous project page" disabled><span aria-hidden="true">←</span><span class="section-page-control-label">Previous project page</span></button>
+              <button type="button" data-project-action="next" aria-label="Next project page" title="Next project page"><span class="section-page-control-label">Next project page</span><span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-panel content-panel--paged" id="skills" data-section="skills" aria-labelledby="skills-title" hidden>
+          <span class="corner corner--tl" aria-hidden="true"></span>
+          <span class="corner corner--tr" aria-hidden="true"></span>
+          <span class="corner corner--bl" aria-hidden="true"></span>
+          <span class="corner corner--br" aria-hidden="true"></span>
+          <div class="panel-teaser" aria-hidden="true">
+            <p><span>04 / 04</span><span>CAPABILITY_MAP</span></p>
+            <strong>Skills</strong>
+            <span>Practice across product, design, and code</span>
+            <i>Approach <b>→</b></i>
+          </div>
+          <div class="panel-scroll">
+            <div class="panel-header">
+              <p class="panel-index">04 / 04 <span>Skills</span></p>
+              <div class="panel-header-tools">
+                <p class="panel-page-count">Page <strong id="skill-page-count">01 / 01</strong></p>
+                <p class="panel-code" aria-hidden="true">SKL_READY</p>
+              </div>
+            </div>
+            <!-- <p class="section-kicker">Skills</p> -->
+            <!-- <h2 id="skills-title" tabindex="-1">Technologies I build with.</h2> -->
+
+            <div class="section-page-stage skill-page-stage" id="skill-page-stage">
+              <!-- Skills layout: x/y choose the starting grid cell; each tier reserves its grid footprint automatically.
+                   Optional dx/dy values add precise visual nudges. Skill-scale resizes only the logo:
+                   --skill-dx: 8px moves right; --skill-dy: -4px moves up; --skill-scale: 1.2 is 120%. -->
+              <div class="section-page skill-page is-selected" data-skill-page-index="0" data-page-label="Interface and mobile skills">
+                <ul class="skill-list skill-list--interface" aria-label="Interface and mobile skills">
+                  <li class="skill-item skill-item--amber skill-item--root" data-skill-node="javascript" style="--skill-x: 2; --skill-y: 4; --skill-scale: .7; --skill-dy: 2.5rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/JavaScript-logo.png" alt="" width="960" height="960" /></span>
+                    <div class="skill-item__copy"><h3>JavaScript</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--core" data-skill-node="typescript" style="--skill-x: 1; --skill-y: 2; --skill-scale: .75;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/Typescript_logo_2020.svg.webp" alt="" width="3840" height="3840" /></span>
+                    <div class="skill-item__copy"><h3>TypeScript</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--violet skill-item--core" data-skill-node="react" style="--skill-x: 3; --skill-y: 2; --skill-scale: 1; --skill-dy: 3rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/React.svg.webp" alt="" width="3840" height="3456" /></span>
+                    <div class="skill-item__copy"><h3>React</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--branch" data-skill-node="html" style="--skill-x: 2; --skill-y: 1; --skill-scale: 1; --skill-dx: 40px">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/html_logo.webp" alt="" width="400" height="400" /></span>
+                    <!-- <div class="skill-item__copy"><h3>HTML</h3></div> -->
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--root" data-skill-node="swift" style="--skill-x: 3; --skill-y: 1; --skill-scale: 0.5; --skill-dy: -30px; --skill-dx: 25px;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/swift_logo.png" alt="" width="512" height="512" /></span>
+                    <div class="skill-item__copy"><h3>Swift</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--core" data-skill-node="xcode" style="--skill-x: 4; --skill-y: 5; --skill-scale: 1; --skill-dx: -80px; --skill-dy: 2rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/xcode_logo.webp" alt="" width="512" height="512" /></span>
+                    <div class="skill-item__copy"><h3>Xcode</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--violet skill-item--branch" data-skill-node="kotlin" style="--skill-x: 3; --skill-y: 7; --skill-scale: 1; --skill-dx: -15px; --skill-dy:2rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/kotlin_logo.png" alt="" width="2000" height="2000" /></span>
+                    <div class="skill-item__copy"><h3>Kotlin</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--violet skill-item--root" data-skill-node="java" style="--skill-x: 1; --skill-y: 5; --skill-scale: 1; --skill-dx: -50px;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/java_logo.svg" alt="" width="2500" height="2500" /></span>
+                    <!-- <div class="skill-item__copy"><h3>Java</h3></div> -->
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--root" data-skill-node="sql" style="--skill-x: 5; --skill-y: 3; --skill-scale: 1; ">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/sql_logo.webp" alt="" width="3840" height="3840" /></span>
+                    <div class="skill-item__copy"><h3>SQL</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--core" data-skill-node="postgresql" style="--skill-x: 6; --skill-y: 2; --skill-scale: .8; --skill-dy: -70px;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/postgresql_logo.webp" alt="" width="1280" height="1320" /></span>
+                    <div class="skill-item__copy"><h3>PostgreSQL</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--violet skill-item--core" data-skill-node="graphql" style="--skill-x: 6; --skill-y: 7; --skill-scale: 1;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/GraphQL_Logo.svg.webp" alt="" width="3840" height="3840" /></span>
+                    <div class="skill-item__copy"><h3>GraphQL</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--root" data-skill-node="python" style="--skill-x: 11; --skill-y: 3; --skill-scale: 1; --skill-dx: 1rem; --skill-dy: 2rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/Python-logo-notext.svg.webp" alt="" width="250" height="250" /></span>
+                    <div class="skill-item__copy"><h3>Python</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--branch" data-skill-node="flask" style="--skill-x: 8; --skill-y: 4; --skill-scale: 1; --skill-dy: -1rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/flask_logo.svg" alt="" width="512" height="512" /></span>
+                    <div class="skill-item__copy"><h3>Flask</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--violet skill-item--branch" data-skill-node="django" style="--skill-x: 7; --skill-y: 5; --skill-scale: .7; --skill-dx: 2rem; --skill-dy: 2rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/django_logo.svg" alt="" width="1963" height="2500" /></span>
+                    <div class="skill-item__copy"><h3>Django</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--core" data-skill-node="spring" style="--skill-x: 9; --skill-y: 7; --skill-scale: .5; --skill-dx: -2rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/spring_logo.png" alt="" width="2400" height="2401" /></span>
+                    <div class="skill-item__copy"><h3>Spring</h3></div>
+                  </li>
+                   <li class="skill-item skill-item--violet skill-item--core" data-skill-node="opencv" style="--skill-x: 8; --skill-y: 2; --skill-scale: .6; --skill-dy: -70px;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/opencv_logo.webp" alt="" width="512" height="512" /></span>
+                    <div class="skill-item__copy"><h3>OpenCV</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--root" data-skill-node="c" style="--skill-x: 13; --skill-y: 2; --skill-scale: .8; --skill-dy: -50px;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/C_Logo.png" alt="" width="360" height="405" /></span>
+                    <div class="skill-item__copy"><h3>C</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--root" data-skill-node="rust" style="--skill-x: 13; --skill-y: 6; --skill-scale: .5;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/rust_logo.webp" alt="" width="1280" height="1280" /></span>
+                    <div class="skill-item__copy"><h3>Rust</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--core" data-skill-node="kafka" style="--skill-x: 10; --skill-y: 3; --skill-scale: 1; --skill-dx: -1rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/kafka_logo.png" alt="" width="800" height="600" /></span>
+                    <div class="skill-item__copy"><h3>Kafka</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--root" data-skill-node="linux" style="--skill-x: 10; --skill-y: 5; --skill-scale: .7; --skill-dx: -3rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/linux_logo.png" alt="" width="800" height="600" /></span>
+                    <div class="skill-item__copy"><h3>Linux</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--amber skill-item--branch" data-skill-node="git" style="--skill-x: 10; --skill-y: 1; --skill-scale: 1;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/git_logo.webp" alt="" width="3840" height="3840" /></span>
+                    <div class="skill-item__copy"><h3>Git</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--core" data-skill-node="docker" style="--skill-x: 12; --skill-y: 2; --skill-scale: 1;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/docker_logo.png" alt="" width="1346" height="1063" /></span>
+                    <div class="skill-item__copy"><h3>Docker</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--cyan skill-item--branch" data-skill-node="kubernetes" style="--skill-x: 13; --skill-y: 4; --skill-scale: .7; --skill-dx: 2rem;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/kubernetes_logo.webp" alt="" width="960" height="933" /></span>
+                    <div class="skill-item__copy"><h3>Kubernetes</h3></div>
+                  </li>
+                  <li class="skill-item skill-item--violet skill-item--satellite" data-skill-node="jenkins" style="--skill-x: 11; --skill-y: 7; --skill-scale: 1;">
+                    <span class="skill-item__mark skill-item__mark--image" aria-hidden="true"><img src="assets/Jenkins_logo.svg.webp" alt="" width="1920" height="2651" /></span>
+                    <div class="skill-item__copy"><h3>Jenkins</h3></div>
+                  </li>
+                </ul>
+              </div>
+
+
+              <!-- <div class="section-page skill-page" data-skill-page-index="2" data-page-label="Data and delivery skills" hidden>
+                <ul class="skill-list skill-list--delivery" aria-label="Data and delivery skills">
+                </ul>
+              </div> -->
+            </div>
+
+            <div class="nested-controls section-page-controls skill-page-controls" role="group" aria-label="Browse Skills pages" hidden>
+              <button type="button" data-skill-page-action="previous" aria-label="Previous Skills page" title="Previous Skills page" disabled><span aria-hidden="true">←</span><span class="section-page-control-label">Previous Skills page</span></button>
+              <button type="button" data-skill-page-action="next" aria-label="Next Skills page" title="Next Skills page"><span class="section-page-control-label">Next Skills page</span><span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div class="orientation" aria-label="Section navigation controls">
+        <button class="orientation-button" id="previous-section" type="button" aria-label="Previous section" disabled><span aria-hidden="true">←</span><span>Previous</span></button>
+        <button class="orientation-button" id="next-section" type="button" aria-label="Next section"><span>Next</span><span aria-hidden="true">→</span></button>
+      </div>
+
+      <div class="utility-bar" aria-label="Utility links and experience preferences">
+        <a href="mailto:hello@example.com"><span aria-hidden="true">@</span> <span>Email</span></a>
+        <button type="button" id="mode-toggle"><span aria-hidden="true">◇</span> <span>Use 2D mode</span></button>
+        <button type="button" id="motion-toggle"><span aria-hidden="true">∿</span> <span>Motion: full</span></button>
+      </div>
+    </div>
+
+    <div class="transition-veil" aria-hidden="true"><span></span></div>
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog class="project-dialog" id="project-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-frame">
+        <button class="dialog-close" id="dialog-close" type="button"><span aria-hidden="true">×</span><span>Close case study</span></button>
+        <div id="dialog-content"></div>
+      </div>
+    </dialog>
+
+    <script defer src="content.js"></script>
+    <script defer src="script.js"></script>
+  </body>
+</html>

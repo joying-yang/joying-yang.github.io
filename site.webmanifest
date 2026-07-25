@@ -1,0 +1,12 @@
+{
+  "name": "Joy In — Creative Developer",
+  "short_name": "Joy In",
+  "description": "A guided digital gallery of education, work, projects, and skills.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#020307",
+  "theme_color": "#020307",
+  "icons": [
+    { "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

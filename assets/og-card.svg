@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Joy In — Creative Developer</title>
+  <desc id="description">A dark violet wireframe gallery with the words Joy In and Creative Developer.</desc>
+  <defs>
+    <radialGradient id="void" cx="60%" cy="58%" r="76%">
+      <stop offset="0" stop-color="#17091d"/>
+      <stop offset=".47" stop-color="#06040b"/>
+      <stop offset="1" stop-color="#020307"/>
+    </radialGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#d66bff" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#d66bff" stop-opacity=".02"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#void)"/>
+  <g fill="none" stroke="#9a55b4" stroke-opacity=".16">
+    <path d="M0 630L600 315 1200 630M110 630L600 315 1090 630M240 630L600 315 960 630M380 630L600 315 820 630M520 630L600 315 680 630"/>
+    <path d="M0 580h1200M0 520h1200M0 458h1200M0 400h1200M0 354h1200"/>
+    <path d="M0 0l600 315L1200 0M170 0l430 315L1030 0"/>
+  </g>
+  <g fill="#07070c" stroke="#9a55b4">
+    <path d="M644 171l230-28v316l-230-18z" fill-opacity=".72" stroke-opacity=".38"/>
+    <path d="M782 112l304-53v438l-304-37z" fill-opacity=".9" stroke="#d66bff"/>
+    <path d="M506 213l165-11v239l-165 2z" fill-opacity=".66" stroke-opacity=".3"/>
+  </g>
+  <path d="M782 139V112h27M1057 64l29-5v31M1086 466v31l-30-4M810 463l-28-3v-30" fill="none" stroke="#f3b7ff" stroke-width="3"/>
+  <circle cx="600" cy="315" r="3" fill="#f3b7ff" filter="url(#glow)"/>
+  <path d="M600 315v190" stroke="url(#fade)"/>
+  <g font-family="ui-monospace,monospace">
+    <text x="73" y="116" fill="#d66bff" font-size="74" letter-spacing="-7">JOY/IN</text>
+    <text x="78" y="160" fill="#aaa56b" font-size="18" letter-spacing="4">CREATIVE DEVELOPER</text>
+    <text x="78" y="205" fill="#8d8494" font-size="16" letter-spacing="2">DESIGNING CALM SYSTEMS</text>
+    <text x="78" y="232" fill="#8d8494" font-size="16" letter-spacing="2">FOR CURIOUS HUMANS.</text>
+    <text x="821" y="196" fill="#aaa56b" font-size="15" letter-spacing="2">03 / 04</text>
+    <text x="821" y="247" fill="#d66bff" font-size="29" letter-spacing="-1">SELECTED WORK</text>
+    <text x="821" y="283" fill="#8d8494" font-size="14">INTERACTION · MOTION · CODE</text>
+    <text x="78" y="549" fill="#d66bff" font-size="14" letter-spacing="3">ENTER THE GALLERY →</text>
+  </g>
+</svg>
