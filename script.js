@@ -53,6 +53,7 @@
     selectedEducationPage: 0,
     selectedProjectPage: 0,
     selectedSkillPage: 0,
+    selectedSkillNode: null,
     returnFocus: null,
     dialogClosePending: false,
   };
@@ -210,6 +211,15 @@
       });
     });
 
+    document.querySelectorAll('[data-skill-page-select]').forEach(function (button) {
+      button.disabled = false;
+      button.addEventListener('click', function () {
+        selectSkillPage(parseInt(button.dataset.skillPageSelect, 10), false);
+      });
+    });
+
+    bindSkillControls();
+
     var skillPageStage = document.getElementById('skill-page-stage');
     if (skillPageStage) {
       var hasMultipleSkillPages = document.querySelectorAll('[data-skill-page-index]').length > 1;
@@ -217,6 +227,7 @@
       skillPageStage.setAttribute('aria-label', hasMultipleSkillPages ? 'Skills pages. Use up and down arrows to change page.' : 'Technology skills.');
       if (hasMultipleSkillPages) {
         skillPageStage.addEventListener('keydown', function (event) {
+          if (event.target !== skillPageStage) return;
           if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
             event.stopPropagation();
@@ -999,7 +1010,75 @@
     if (!pages.length) return;
     var previousPage = state.selectedSkillPage;
     state.selectedSkillPage = Math.max(0, Math.min(pages.length - 1, state.selectedSkillPage + direction));
+    if (previousPage !== state.selectedSkillPage) state.selectedSkillNode = null;
     updateSkillPages(silent || previousPage === state.selectedSkillPage);
+  }
+
+  function selectSkillPage(index, silent) {
+    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-index]'));
+    if (!pages.length || !isFinite(index)) return;
+    var previousPage = state.selectedSkillPage;
+    state.selectedSkillPage = Math.max(0, Math.min(pages.length - 1, index));
+    if (previousPage !== state.selectedSkillPage) state.selectedSkillNode = null;
+    updateSkillPages(silent || previousPage === state.selectedSkillPage);
+  }
+
+  function bindSkillControls() {
+    document.querySelectorAll('[data-skill-control]').forEach(function (control) {
+      control.addEventListener('click', function () {
+        if (state.mode !== '3d') return;
+        var item = control.closest('[data-skill-node]');
+        if (!item) return;
+        var page = control.closest('[data-skill-page-index]');
+        var node = item.dataset.skillNode;
+        var selected = state.selectedSkillNode === node;
+        var name = control.querySelector('.skill-item__copy strong');
+        var type = control.querySelector('.skill-item__copy small');
+        var detail = control.querySelector('.skill-item__detail');
+        if (page) state.selectedSkillPage = parseInt(page.dataset.skillPageIndex, 10) || 0;
+        state.selectedSkillNode = selected ? null : node;
+        updateSkillPages(true);
+        if (selected) {
+          announce((name ? name.textContent : node) + ' deselected. Showing ' + (page && page.dataset.pageLabel ? page.dataset.pageLabel : 'skills') + ' layer summary.');
+          return;
+        }
+        announce((name ? name.textContent : node) + (type ? ', ' + type.textContent : '') + '. ' + (detail ? detail.textContent : ''));
+      });
+      control.addEventListener('keydown', function (event) {
+        if (state.mode !== '3d') return;
+        if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+          event.preventDefault();
+          if (!event.repeat) control.click();
+        }
+      });
+    });
+  }
+
+  function updateSkillInspector(control) {
+    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-index]'));
+    var page = pages[state.selectedSkillPage] || pages[0];
+    var type = document.getElementById('skill-inspector-type');
+    var code = document.getElementById('skill-inspector-code');
+    var title = document.getElementById('skill-inspector-title');
+    var copy = document.getElementById('skill-inspector-copy');
+    if (!type || !code || !title || !copy || !page) return;
+
+    if (control) {
+      var item = control.closest('[data-skill-node]');
+      var name = control.querySelector('.skill-item__copy strong');
+      var category = control.querySelector('.skill-item__copy small');
+      var detail = control.querySelector('.skill-item__detail');
+      type.textContent = category ? category.textContent : 'Technology';
+      code.textContent = item ? item.dataset.skillNode.replace(/-/g, '_').toUpperCase() : 'NODE';
+      title.textContent = name ? name.textContent : 'Technology node';
+      copy.textContent = detail ? detail.textContent : 'Selected capability.';
+      return;
+    }
+
+    type.textContent = 'Active layer';
+    code.textContent = pad(state.selectedSkillPage + 1) + ' / ' + pad(pages.length);
+    title.textContent = page.dataset.pageLabel || 'Technology skills';
+    copy.textContent = page.dataset.pageSummary || 'Select a technology node to inspect it.';
   }
 
   function updateSkillPages(silent) {
@@ -1015,14 +1094,40 @@
       page.classList.toggle('is-selected', selected);
     });
 
+    document.querySelectorAll('[data-skill-control]').forEach(function (control) {
+      if (expanded) {
+        control.removeAttribute('role');
+        control.removeAttribute('tabindex');
+        control.removeAttribute('aria-pressed');
+        return;
+      }
+      var item = control.closest('[data-skill-node]');
+      control.setAttribute('role', 'button');
+      control.tabIndex = 0;
+      control.setAttribute('aria-pressed', String(Boolean(item && item.dataset.skillNode === state.selectedSkillNode)));
+    });
+
     var counter = document.getElementById('skill-page-count');
     if (counter) counter.textContent = pad(state.selectedSkillPage + 1) + ' / ' + pad(pages.length);
     var previousButton = document.querySelector('[data-skill-page-action="previous"]');
     var nextButton = document.querySelector('[data-skill-page-action="next"]');
     var controls = document.querySelector('.skill-page-controls');
+    var pageSelectors = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-select]'));
     if (controls) controls.hidden = pages.length < 2;
     if (previousButton) previousButton.disabled = state.selectedSkillPage === 0;
     if (nextButton) nextButton.disabled = state.selectedSkillPage === pages.length - 1;
+    pageSelectors.forEach(function (button) {
+      var selected = parseInt(button.dataset.skillPageSelect, 10) === state.selectedSkillPage;
+      button.disabled = false;
+      button.setAttribute('aria-pressed', String(selected));
+    });
+
+    var selectedControl = null;
+    if (state.selectedSkillNode) {
+      var selectedItem = document.querySelector('[data-skill-node="' + state.selectedSkillNode + '"]');
+      selectedControl = selectedItem && selectedItem.querySelector('[data-skill-control]');
+    }
+    updateSkillInspector(selectedControl);
 
     if (!silent) {
       var selectedPage = pages[state.selectedSkillPage];

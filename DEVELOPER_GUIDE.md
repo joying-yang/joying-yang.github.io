@@ -19,41 +19,51 @@ You do **not** need to understand the WebGL mathematics to change ordinary portf
 
 ## 1. Start here
 
-### Run the site
+### Run the site on macOS
 
-Open PowerShell and run:
+Open Terminal, change to the repository folder, and run:
 
-```powershell
-Set-Location -LiteralPath 'C:\Users\joyin\projects\pp'
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\tools\serve.ps1'
+```sh
+cd /path/to/joying-yang.github.io
+./tools/serve.sh
 ```
 
-Keep that PowerShell window open. In Chrome, visit:
+Keep that Terminal window open. In a browser, visit:
 
 ```text
 http://127.0.0.1:4173/
 ```
 
-Use `127.0.0.1`, not `localhost`. The development server binds specifically to the IPv4 loopback address, while `localhost` can resolve differently on some Windows systems.
+Use `127.0.0.1`, not `localhost`. The development server binds specifically to the IPv4 loopback address.
 
-Stop the server with `Ctrl+C` in PowerShell.
+Stop the server with `Ctrl+C` in Terminal.
 
-There is no automatic reload. After saving a file, refresh Chrome. Use `Ctrl+F5` when you want to force a full refresh.
-Skip to portfolio content
+There is no automatic reload. After saving a file, refresh the browser. Use `Command+Shift+R` when you want to force a full refresh.
+
 If port 4173 is already occupied, use another port:
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\tools\serve.ps1' -Port 4174
+```sh
+./tools/serve.sh --port 4174
 ```
 
 Then visit `http://127.0.0.1:4174/`.
+
+The shell wrapper requires Python 3. If `python3` is unavailable, install it with Homebrew using `brew install python`.
+
+### Windows compatibility
+
+The original PowerShell server remains available:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\tools\serve.ps1'
+```
 
 ### Validate your changes
 
 From the repository folder, run:
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\tools\validate.ps1'
+```sh
+./tools/validate.sh
 ```
 
 A successful result currently begins with:
@@ -120,9 +130,11 @@ The important design decision is that **WebGL does not draw the portfolio text**
 | [`site.webmanifest`](site.webmanifest) | Install-style name, icon, and colors |
 | [`sitemap.xml`](sitemap.xml) | Public URLs for search engines |
 | [`robots.txt`](robots.txt) | Search-crawler rules and sitemap location |
-| [`vercel.json`](vercel.json) | Clean URLs, trailing slashes, and production security headers for Vercel |
-| [`tools/serve.ps1`](tools/serve.ps1) | Local static development server |
-| [`tools/validate.ps1`](tools/validate.ps1) | Dependency-free structural validation |
+| [`vercel.json`](vercel.json) | Optional clean URLs, trailing slashes, and production security headers for Vercel |
+| [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) | Validated, allowlisted GitHub Pages deployment |
+| [`tools/serve.sh`](tools/serve.sh) / [`tools/serve.py`](tools/serve.py) | macOS and cross-platform local static development server |
+| [`tools/validate.sh`](tools/validate.sh) / [`tools/validate.py`](tools/validate.py) | macOS and cross-platform structural validation |
+| [`tools/serve.ps1`](tools/serve.ps1) / [`tools/validate.ps1`](tools/validate.ps1) | Original Windows-compatible development tools |
 | [`README.md`](README.md) | Short project summary and launch handoff notes |
 | `DEVELOPER_GUIDE.md` | This document |
 
@@ -266,7 +278,7 @@ Each section has two visual content layers:
 
 When changing a section’s message, remember to update its short teaser as well as its full content.
 
-Education, Projects, and Skills divide their content into authored subpages at one physical gallery stop. Education page `0` contains the degree overview and page `1` contains Selected coursework and Organizations. Projects page `0` uses a three-card content-weighted mosaic, while page `1` uses a four-card 2×2 grid. Skills distributes twenty-six asset-backed technology nodes across three dependency-oriented maps. These sections share `.content-panel--paged`, `.section-page-stage`, and `.section-page`. Spatial mode exposes one authored page at a time without an internal content scrollbar. Sections with multiple pages show white arrow buttons just outside the panel's fixed vertical center, while `.panel-page-count` displays the current page in the top header. In 2D and without JavaScript, pagination controls and page counters are hidden because all authored pages appear in normal document order.
+Education, Projects, and Skills divide their content into authored subpages at one physical gallery stop. Education page `0` contains the degree overview and page `1` contains Selected coursework and Organizations. Projects page `0` uses a three-card content-weighted mosaic, while page `1` uses a four-card 2×2 grid. Skills distributes twenty-four asset-backed technology nodes across three eight-item capability layers. These sections share `.content-panel--paged`, `.section-page-stage`, and `.section-page`. Spatial mode exposes one authored page at a time without an internal content scrollbar. Education and Projects use white arrow buttons outside the panel; Skills uses three labeled layer selectors inside the panel. The `.panel-page-count` reports the current authored page. In 2D and without JavaScript, every authored page appears in normal document order.
 
 Work is deliberately different. It has one `.work-timeline-page` inside `#work-timeline`, no Work subpage arrows, and a fixed `01 / 01` header count. Three chronological experience flags—Tesla, Apple, and Meta—share one road, followed by a fourth Suggestions/Email contact post. These are simultaneous disclosures rather than separately paginated role articles.
 
@@ -330,12 +342,12 @@ Flexcar, Prove, and Tailorbird use ordinary `.project-card__external` links to t
 Skills keeps the same zero-based page convention as Education. It currently has pages `0` through `2`:
 
 ```html
-<div class="section-page skill-page is-selected" data-skill-page-index="0">...</div>
+<section class="section-page skill-page is-selected" data-skill-page-index="0">...</section>
 ```
 
-Each Skills subpage contains a semantic `.skill-list` with real `.skill-item` list items. The three maps are Interface/Mobile, Application/Systems, and Data/Delivery. Wide layouts use a compact six-row coordinate field inside a centered `920px × 350px` maximum map. Interface uses twelve columns, Application uses sixteen, and Delivery uses fourteen. The differing column counts let busier pages fit more nodes without changing logo or text sizes.
+Each Skills subpage contains a semantic `.skill-list` with eight `.skill-item` list items. The layers are Interface/Mobile, Application/Systems, and Data/Delivery. Wide landscape layouts use the same four-column by two-row matrix for every layer; narrow and portrait spatial layouts use two columns by four rows. There are no per-node coordinates, offsets, size tiers, or proficiency implications.
 
-`skill-item--root`, `skill-item--core`, `skill-item--branch`, and `skill-item--satellite` control logo size and label emphasis. A root is a language or platform that organizes a local ecosystem; the smaller tiers reflect relationship and current portfolio relevance, not a numeric proficiency score. Every node is a centered vertical stack: an official local logo, then the technology heading, then its short category label. The logo wrapper and image use `aria-hidden="true"` and `alt=""` because the adjacent `<h3>` already supplies the accessible name. Tablet and mobile rules remove the fixed coordinates and return each page to DOM-order columns.
+The layer selector buttons update `selectedSkillPage`, the visible page, the header counter, and the inspector summary. Every technology starts as a static descriptive card. In spatial mode, JavaScript progressively adds `role="button"`, keyboard focus, and `aria-pressed`; selecting a card sets `selectedSkillNode` and replaces the inspector summary with the technology type and practical context. In 2D and without JavaScript, all descriptions remain inline and the cards retain ordinary non-interactive semantics. Local logos remain decorative because every card has a visible text name.
 
 The code advances entries or page wrappers in their HTML/DOM order; it does not sort by the numeric attribute value. Sequential zero-based values are a useful convention, but moving a page or article changes the carousel order. Every section stops at its endpoints and disables the unavailable previous or next button.
 
@@ -500,7 +512,7 @@ At startup, `boot()`:
 3. Applies saved motion and mode preferences.
 4. Attaches event listeners.
 5. Starts the decorative local clock.
-6. Initializes the Education, Projects, and Skills page selectors, then binds the Work-stop disclosures and project-card flip controls.
+6. Initializes Education and Project pagination, the Skills layer selector and node inspector, Work-stop disclosures, and project-card flip controls.
 7. Starts lazy WebGL loading on the next animation frame.
 8. Bypasses the entrance when the URL already contains a valid section hash or `?mode=2d`.
 
@@ -523,6 +535,7 @@ At startup, `boot()`:
 | `selectedEducationPage` | Current Education subpage index |
 | `selectedProjectPage` | Current Projects subpage index |
 | `selectedSkillPage` | Current Skills subpage index |
+| `selectedSkillNode` | Selected technology node, or `null` when the inspector shows its layer summary |
 | `returnFocus` | Element that receives focus when a case study closes |
 | `dialogClosePending` | Prevents duplicate history operations while closing a dialog |
 
@@ -859,7 +872,7 @@ Update all relevant copies:
 
 Find current occurrences with:
 
-```powershell
+```sh
 rg -n "Joy In|JOY|IN" .
 ```
 
@@ -871,15 +884,15 @@ There are currently two `mailto:` links in `index.html`: the Work timeline's Sug
 
 Find them with:
 
-```powershell
+```sh
 rg -n "hello@example.com|mailto:" .
 ```
 
 Change both the visible email behavior and any surrounding contact copy you want.
 
-### Replace the placeholder public domain
+### Change the public domain
 
-Before deployment, replace `portfolio.example` in:
+The checked-in production URL is `https://joying-yang.github.io/`. If the site moves to a custom domain, update it in:
 
 - Main canonical and Open Graph metadata.
 - Every standalone project page.
@@ -888,8 +901,8 @@ Before deployment, replace `portfolio.example` in:
 
 Use:
 
-```powershell
-rg -n "portfolio\.example" .
+```sh
+rg -n "joying-yang\.github\.io" index.html projects robots.txt sitemap.xml
 ```
 
 ### Edit a section or authored subpage
@@ -1008,47 +1021,28 @@ If an object key contains a hyphen, quote it or JavaScript will fail to parse:
 
 ### Add or edit a skill item
 
-Skill entries are ordinary `<li class="skill-item ...">` elements inside `.skill-page .skill-list` in `index.html`. Copy one complete list item, then change its node key, size tier, category, technology name, and local image path:
+Skill entries are uniform cards inside `.skill-page .skill-list` in `index.html`. Copy one complete list item into the most relevant capability layer, then change its node key, accent modifier, description, technology name, category, and local image path:
 
 ```html
-<li
-  class="skill-item skill-item--cyan skill-item--core"
-  data-skill-node="typescript"
-  style="--skill-x: 4; --skill-y: 1; --skill-dx: 0px; --skill-dy: 0px; --skill-scale: 1;"
->
-  <span class="skill-item__mark skill-item__mark--image" aria-hidden="true">
-    <img src="assets/Typescript_logo_2020.svg.webp" alt="" width="3840" height="3840" />
-  </span>
-  <div class="skill-item__copy">
-    <h3>TypeScript</h3>
-    <p class="skill-item__category">Typed language</p>
+<li class="skill-item" data-skill-node="typescript">
+  <div class="skill-item__control" data-skill-control>
+    <span class="skill-item__mark" aria-hidden="true">
+      <img src="assets/Typescript_logo_2020.svg.webp" alt="" width="3840" height="3840" />
+    </span>
+    <span class="skill-item__copy">
+      <strong>TypeScript</strong>
+      <small>Typed language</small>
+      <span class="skill-item__detail">Typed client architecture for maintainable product systems.</span>
+    </span>
   </div>
 </li>
 ```
 
-The first two custom properties in each opening `<li>` control the structural desktop position. The next two provide optional pixel-level visual adjustments, while `--skill-scale` controls the logo size:
+`data-skill-node` must be unique and URL-safe. The `.skill-item__detail` text supplies both the inline 2D description and the spatial inspector sentence. Keep the source control as a plain `<div>`: `updateSkillPages()` adds button semantics only while spatial interaction is available. The default accent is cyan; add `skill-item--amber` or `skill-item--violet` for restrained visual rhythm, not to imply proficiency.
 
-| Property | Meaning |
-| --- | --- |
-| `--skill-x` | Starting column, counted from the left |
-| `--skill-y` | Starting row, counted from the top |
-| `--skill-dx` | Fine horizontal nudge; positive moves right and negative moves left |
-| `--skill-dy` | Fine vertical nudge; positive moves down and negative moves up |
-| `--skill-scale` | Logo-size multiplier; `1` is normal size, `0.8` is 80%, and `1.25` is 125% |
+Keep each layer near eight items so the fixed spatial panel retains its four-by-two landscape and two-by-four narrow/portrait matrix. When adding a technology, rebalance layers or add another sequential `.skill-page`, a matching `[data-skill-page-select]` button, and accurate page counts. `updateSkillPages()` discovers page wrappers, while the direct selector's `data-skill-page-select` value chooses its zero-based index.
 
-For example, increasing `--skill-x` moves a skill to the next structural column; decreasing `--skill-y` moves it to the previous row. The size tier now assigns the reserved footprint automatically: a root normally reserves `3 × 4` cells, a core `2 × 3`, a branch `2 × 2`, and a satellite `3 × 2`. A small set of node-specific exceptions in `styles.css` preserves the existing composition.
-
-Use `--skill-dx` and `--skill-dy` when a full grid cell is too large a jump. Values can use pixels, decimals, or another CSS length, such as `--skill-dx: 7.5px; --skill-dy: -3px;`. These offsets move only the rendered skill; they do not move its reserved grid area, so make large adjustments with `x`/`y` first and use `dx`/`dy` only for final alignment. The CSS applies these values through relative `left` and `top` offsets rather than a transform, preserving sharp text rendering.
-
-Use `--skill-scale` to resize the logo. The scale applies only to `.skill-item__mark` (the logo and its glow), so the skill name and category retain consistent text sizing. Moderate values such as `0.7` through `1.4` are safest; a much larger logo can extend beyond its reserved grid area and overlap a neighbor.
-
-The shared `.skill-item` rule converts `x` and `y` into `grid-column` and `grid-row`; its tier class supplies the span. To change the density of every map, edit `--skill-map-width`, `--skill-map-height`, or `--skill-rows` near `.skill-list` in `styles.css`. To change only one page's horizontal resolution, edit `--skill-columns` under `.skill-list--interface`, `--skill-list--application`, or `.skill-list--delivery`. Use one of the four size modifiers to set visual weight.
-
-Below `900px`, 2D and JavaScript-free presentations ignore these coordinates and fine offsets and use a three-column flow, then two columns below `768px` and one below `520px`; roots span two tracks until the one-column breakpoint. Narrow spatial mode also ignores the coordinates and offsets and uses a compact two-column layout. This means desktop positions can be edited without breaking the mobile reading order.
-
-If a new ecosystem makes a fixed spatial page feel crowded, add another sequential `.skill-page` instead of adding a scrollbar or squeezing every node smaller. Keep only the first page initially selected; JavaScript discovers the new page count, reveals the existing Skills side controls, and updates their disabled states and the header counter.
-
-Put new logo files under `assets/` and prefer transparent PNG, WebP, or valid SVG artwork. Keep the empty image alternative because the adjacent heading supplies the technology name. `.skill-item__mark img` constrains the logo without stretching it. The uploaded `html_logo.svg` and `git_logo.svg` files contain WebP data despite their extensions, so the page references the byte-identical `html_logo.webp` and `git_logo.webp` copies for reliable HTTP content types. Dark or baked-background artwork is corrected only with node-specific CSS filters; avoid applying a blanket filter to every brand logo.
+Put new logo files under `assets/` and prefer transparent PNG, WebP, or valid SVG artwork. Keep the empty image alternative because the adjacent text supplies the technology name. `.skill-item__mark img` constrains the logo without stretching it. The uploaded `html_logo.svg` and `git_logo.svg` files contain WebP data despite their extensions, so the page references the byte-identical `html_logo.webp` and `git_logo.webp` copies for reliable HTTP content types. Dark or baked-background artwork is corrected only with node-specific CSS filters; avoid applying a blanket filter to every brand logo.
 
 ### Change colors
 
@@ -1159,7 +1153,7 @@ Changing `hidden`, `inert`, focus calls, `aria-*`, or heading structure can affe
 
 ### Development server
 
-`tools/serve.ps1` is a small single-process static server for local development. It:
+`tools/serve.sh` launches the cross-platform Python server in `tools/serve.py`. It:
 
 - Binds only to `127.0.0.1`.
 - Maps `/` and directories to `index.html`.
@@ -1170,20 +1164,21 @@ Changing `hidden`, `inert`, focus calls, `aria-*`, or heading structure can affe
 - Supports `HEAD` requests.
 - Sends `Cache-Control: no-cache`.
 
-It is not intended to be exposed as a public production server.
+It is not intended to be exposed as a public production server. `tools/serve.ps1` remains available for Windows users and provides the same core routing behavior.
 
 ### Validator coverage
 
-`tools/validate.ps1` checks:
+`tools/validate.py` checks:
 
 - HTML doctypes.
 - Duplicate IDs within each page.
 - Local `href` and `src` targets.
 - Local hash fragments.
-- JSON parsing for the manifest and Vercel config.
+- JSON parsing for the manifest and, in the source tree, the optional Vercel config.
 - XML parsing for the sitemap and SVG assets.
 - A real standalone route for every `slug:` in `content.js`.
 - That `scene.js` remains lazy-loaded.
+- That the placeholder production domain has not returned.
 
 It does **not** check:
 
@@ -1194,11 +1189,32 @@ It does **not** check:
 - Metadata accuracy.
 - Whether duplicated project content matches.
 
-The validator is intentionally simple and regex-based. Its HTML checks expect double-quoted `id`, `href`, and `src` attributes, and its project discovery expects a single-quoted pattern such as `slug: 'threshold'`. Keeping those quote conventions ensures the checks see your edits; changing them can make a check silently miss something.
+The validator is intentionally simple and regex-based. Its HTML checks expect double-quoted `id`, `href`, and `src` attributes, and its project discovery expects a single-quoted pattern such as `slug: 'threshold'`. Keeping those quote conventions ensures the checks see your edits; changing them can make a check silently miss something. `tools/validate.ps1` remains available for Windows compatibility.
+
+### GitHub Pages deployment
+
+The repository name, `joying-yang.github.io`, makes this a root-level GitHub user site. Its production URL is:
+
+```text
+https://joying-yang.github.io/
+```
+
+The workflow in `.github/workflows/deploy-pages.yml` runs on every push to `main` and can also be started manually. It performs four steps:
+
+1. Runs the Python validator against the source tree.
+2. Copies only the public HTML, CSS, JavaScript, manifest, crawler files, project routes, and assets into `_site`.
+3. Validates that staged artifact a second time.
+4. Uploads and deploys the artifact to the `github-pages` environment.
+
+The explicit allowlist keeps development tools, repository metadata, temporary browser profiles, and Vercel configuration out of the public website artifact. The staged `.nojekyll` file also tells Pages to serve the files as an ordinary static site.
+
+Before the first deployment, open **Settings → Pages** in GitHub and choose **GitHub Actions** as the publishing source. Push to `main`, then review the **Deploy portfolio to GitHub Pages** workflow in the Actions tab. GitHub Pages serves user sites from a case-sensitive Linux environment, so preserve the exact capitalization of every referenced filename.
+
+GitHub Pages supports the site's directory-index project routes and custom `404.html`, but it does not apply the response headers in `vercel.json`. Enforce HTTPS in the Pages settings. If equivalent Content Security Policy or other custom response headers are required, use a host that supports them or put a configurable CDN in front of Pages.
 
 ### Vercel deployment
 
-This is a static site. Use the `pp` directory as the project root and no build command.
+Vercel remains an optional alternative. Use the repository directory as the project root and no build command.
 
 `vercel.json` enables clean URLs, trailing slashes, and security headers. Its Content Security Policy currently allows same-origin scripts, styles, fonts, connections, and images plus `data:` images. Adding an external font, analytics service, API, embed, form provider, or CDN usually requires an explicit CSP change.
 
@@ -1212,7 +1228,7 @@ The web manifest provides install-style naming and colors, but there is no servi
 
 `og-card.svg` is editable source art. Social metadata references `og-card.png`; changing the SVG does not regenerate the PNG. Replace or regenerate the PNG after changing the social artwork.
 
-The 404 page uses root-relative paths such as `/styles.css`. That is correct for root-domain deployment but requires adjustment when hosting the entire site under a subdirectory.
+The 404 page uses root-relative paths such as `/styles.css`. That is correct for this root-level GitHub user site, but requires adjustment if the repository is renamed and hosted as a project site under a subdirectory.
 
 `robots.txt` currently allows crawling. Do not publish a private staging site unchanged if search indexing is unwanted.
 
@@ -1221,7 +1237,7 @@ The 404 page uses root-relative paths such as `/styles.css`. That is correct for
 ### A saved change does not appear
 
 1. Confirm the file was saved.
-2. Use `Ctrl+F5`.
+2. Use `Command+Shift+R` on macOS (`Ctrl+F5` on Windows).
 3. Confirm the server is still running.
 4. Confirm you opened `127.0.0.1` with the correct port.
 5. Search later CSS rules that may override your change.
@@ -1271,7 +1287,7 @@ Update both `content.js` and `projects/<slug>/index.html`, plus the preview in `
 
 Confirm:
 
-- The server was started from the `pp` repository.
+- The server was started from this repository.
 - The directory is exactly `projects/<slug>/`.
 - That directory contains `index.html`.
 - `content.js` uses the same slug.
@@ -1300,7 +1316,7 @@ That can be expected on unsupported, restricted, or context-lost environments. C
 9. Use Tab, Enter, Escape, and arrow keys.
 10. Test project dialogs and their direct pages when relevant.
 11. Toggle reduced motion after motion/layout edits.
-12. Run `tools/validate.ps1`.
+12. Run `./tools/validate.sh` on macOS or `tools/validate.ps1` on Windows.
 
 For larger edits, keep a short checklist of every duplicated location you changed.
 
@@ -1331,13 +1347,14 @@ When you are ready to read the code, start with these named areas rather than re
 
 | File | Start with |
 |---|---|
-| [`index.html`](index.html) | `#entry-gate`, `.section-nav`, `#portfolio-main`, each `[data-section]`, `#work-timeline`, `[data-work-stop]`, `.project-page`, `[data-project-card]`, `#project-dialog` |
-| [`styles.css`](styles.css) | `:root`, `.entry-gate`, `.content-panel`, `.work-timeline__artboard`, `.work-timeline__kirbs-track`, `.work-stop`, `.project-card-grid--mosaic`, `.project-card-grid--four`, `.project-card--feature`, `.project-card--compact`, `.project-card--flip`, `.project-card__face`, `.project-card__external--placeholder`, `.has-scene-projection`, `body[data-mode="2d"]`, responsive and container queries |
-| [`script.js`](script.js) | `state`, `boot()`, `bindEvents()`, `bindWorkStops()`, `setWorkStop()`, `closeWorkStops()`, `bindProjectCards()`, `requestProjectCardFace()`, `setProjectCardFace()`, `enterGallery()`, `goToSection()`, `applySceneProjection()`, `updateEducationPages()`, `updateProjectPages()`, `updateSkillPages()`, `setMode()`, `openProject()` |
+| [`index.html`](index.html) | `#entry-gate`, `.section-nav`, `#portfolio-main`, each `[data-section]`, `#work-timeline`, `[data-work-stop]`, `.project-page`, `[data-project-card]`, `.skill-page-selector`, `[data-skill-control]`, `#project-dialog` |
+| [`styles.css`](styles.css) | `:root`, `.entry-gate`, `.content-panel`, `.work-timeline__artboard`, `.work-timeline__kirbs-track`, `.work-stop`, `.project-card-grid--mosaic`, `.project-card-grid--four`, `.project-card--feature`, `.project-card--compact`, `.project-card--flip`, `.project-card__face`, `.skill-overview`, `.skill-list`, `.skill-item__control`, `.has-scene-projection`, `body[data-mode="2d"]`, responsive and container queries |
+| [`script.js`](script.js) | `state`, `boot()`, `bindEvents()`, `bindWorkStops()`, `setWorkStop()`, `closeWorkStops()`, `bindProjectCards()`, `requestProjectCardFace()`, `setProjectCardFace()`, `bindSkillControls()`, `updateSkillInspector()`, `enterGallery()`, `goToSection()`, `applySceneProjection()`, `updateEducationPages()`, `updateProjectPages()`, `updateSkillPages()`, `setMode()`, `openProject()` |
 | [`scene.js`](scene.js) | panel sizing constants, `STOPS`, `createScene()`, `syncPanelGeometry()`, `render()`, `draw()`, `emitProjection()`, `transitionTo()`, `softLinear()` |
 | [`content.js`](content.js) | `window.PORTFOLIO_PROJECTS` and one complete project record |
-| [`tools/serve.ps1`](tools/serve.ps1) | listener creation, target resolution, response headers |
-| [`tools/validate.ps1`](tools/validate.ps1) | HTML loop, reference checks, project-slug checks |
+| [`tools/serve.py`](tools/serve.py) | request handler, custom 404 response, local server startup |
+| [`tools/validate.py`](tools/validate.py) | HTML loop, reference checks, project-slug checks |
+| [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) | validation, public-file staging, Pages artifact, deployment job |
 
 ## 18. Glossary
 

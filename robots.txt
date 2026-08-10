@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://portfolio.example/sitemap.xml
+Sitemap: https://joying-yang.github.io/sitemap.xml

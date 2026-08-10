@@ -1,1 +1,5 @@
-./DEVELOPER_GUIDE.md
+.DS_Store
+.tmp/
+_site/
+__pycache__/
+*.py[cod]
