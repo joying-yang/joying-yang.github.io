@@ -31,6 +31,7 @@
   documentUrl.hash = '';
   var sectionBaseUrl = window.location.protocol === 'file:' ? documentUrl : rootUrl;
   var motionMedia = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  var mobileWorkStopMedia = window.matchMedia ? window.matchMedia('(max-width: 767px)') : null;
 
   var storedMode = readPreference('liminal-mode');
   var storedMotion = readPreference('liminal-motion');
@@ -65,6 +66,7 @@
   var spatialProjectionActive = false;
   var spatialSizeKey = '';
   var spatialSizes = {};
+  var workStopMobileLayer = null;
 
   boot();
 
@@ -359,6 +361,7 @@
 
   function goToSection(id, source, pushHistory) {
     if (SECTIONS.indexOf(id) === -1) return;
+    if (id !== 'work') closeMobileWorkStops(true);
     if (!state.entered) {
       state.active = id;
       revealExperience({ focus: false });
@@ -806,6 +809,7 @@
         endLinearNavigation();
       }
       if (id === state.active || SECTIONS.indexOf(id) === -1) return;
+      if (id !== 'work') closeMobileWorkStops(true);
       state.active = id;
       state.settled = id;
       if (sceneController) sceneController.setActive(id);
@@ -1009,28 +1013,101 @@
     var timeline = document.getElementById('work-timeline');
     if (!timeline) return;
     var stops = Array.prototype.slice.call(timeline.querySelectorAll('[data-work-stop]'));
+    var lastOpenedStop = null;
+
+    workStopMobileLayer = document.createElement('div');
+    workStopMobileLayer.className = 'work-stop-mobile-layer';
+    workStopMobileLayer.hidden = true;
+    document.body.appendChild(workStopMobileLayer);
+
+    function keepOnlyWorkStop(activeStop) {
+      stops.forEach(function (candidate) {
+        if (candidate !== activeStop && candidate._workStopTarget) {
+          setWorkStop(candidate, false, true);
+        }
+      });
+    }
 
     stops.forEach(function (stop) {
       var trigger = stop.querySelector('[data-work-stop-trigger]');
       var closeButton = stop.querySelector('[data-work-stop-close]');
-      if (!trigger) return;
+      var panel = stop.querySelector('[data-work-stop-panel]');
+      if (!trigger || !panel) return;
+      stop._workStopPanel = panel;
+      panel.classList.toggle('work-stop__panel--apple', stop.classList.contains('work-stop--apple'));
       setWorkStop(stop, false, true);
       trigger.addEventListener('click', function () {
-        if (!stop._workStopTarget) setWorkStop(stop, true, false);
+        if (stop._workStopTarget) return;
+        lastOpenedStop = stop;
+        if (isMobileWorkStopLayout()) keepOnlyWorkStop(stop);
+        setWorkStop(stop, true, false);
+        if (isMobileWorkStopLayout() && closeButton) {
+          window.requestAnimationFrame(function () {
+            if (!stop._workStopTarget) return;
+            try { closeButton.focus({ preventScroll: true }); }
+            catch (error) { closeButton.focus(); }
+          });
+        }
       });
       if (closeButton) {
         closeButton.addEventListener('click', function () {
           setWorkStop(stop, false, false);
+          if (lastOpenedStop === stop) lastOpenedStop = null;
           trigger.focus({ preventScroll: true });
         });
       }
     });
 
+    function handleMobileWorkStopLayout(event) {
+      if (event.matches) {
+        var fallbackStop = stops.find(function (stop) { return stop._workStopTarget; });
+        var activeStop = lastOpenedStop && lastOpenedStop._workStopTarget ? lastOpenedStop : fallbackStop;
+        keepOnlyWorkStop(activeStop);
+        if (activeStop) setWorkStop(activeStop, true, true);
+        return;
+      }
+      stops.forEach(function (stop) {
+        if (stop._workStopPanel && stop._workStopPanel.parentNode === workStopMobileLayer) {
+          setWorkStop(stop, Boolean(stop._workStopTarget), true);
+        }
+      });
+    }
+
+    if (mobileWorkStopMedia) {
+      if (mobileWorkStopMedia.addEventListener) mobileWorkStopMedia.addEventListener('change', handleMobileWorkStopLayout);
+      else if (mobileWorkStopMedia.addListener) mobileWorkStopMedia.addListener(handleMobileWorkStopLayout);
+    }
+  }
+
+  function isMobileWorkStopLayout() {
+    return mobileWorkStopMedia ? mobileWorkStopMedia.matches : window.innerWidth <= 767;
+  }
+
+  function mountMobileWorkStopPanel(stop, panel) {
+    if (!workStopMobileLayer || panel.parentNode === workStopMobileLayer) return;
+    var accent = window.getComputedStyle(stop).getPropertyValue('--stop-accent').trim();
+    if (accent) panel.style.setProperty('--stop-accent', accent);
+    workStopMobileLayer.hidden = false;
+    workStopMobileLayer.appendChild(panel);
+  }
+
+  function restoreWorkStopPanel(stop, panel) {
+    if (!workStopMobileLayer || panel.parentNode !== workStopMobileLayer) return;
+    stop.appendChild(panel);
+    panel.style.removeProperty('--stop-accent');
+    if (!workStopMobileLayer.children.length) workStopMobileLayer.hidden = true;
+  }
+
+  function closeMobileWorkStops(immediate) {
+    if (!isMobileWorkStopLayout() && (!workStopMobileLayer || !workStopMobileLayer.children.length)) return;
+    document.querySelectorAll('[data-work-stop]').forEach(function (stop) {
+      if (stop._workStopTarget) setWorkStop(stop, false, immediate);
+    });
   }
 
   function setWorkStop(stop, open, immediate) {
     var trigger = stop.querySelector('[data-work-stop-trigger]');
-    var panel = stop.querySelector('[data-work-stop-panel]');
+    var panel = stop._workStopPanel || stop.querySelector('[data-work-stop-panel]');
     if (!trigger || !panel) return;
 
     var token = (stop._workStopToken || 0) + 1;
@@ -1040,6 +1117,10 @@
     panel.style.opacity = '';
     panel.style.transform = '';
     stop.classList.remove('is-animating');
+    if (open) {
+      if (isMobileWorkStopLayout()) mountMobileWorkStopPanel(stop, panel);
+      else restoreWorkStopPanel(stop, panel);
+    }
     trigger.setAttribute('aria-expanded', String(open));
     var stopLabel = stop.dataset.workLabel || ((stop.dataset.workCompany || 'work') + ' experience details');
     trigger.setAttribute('aria-label', open ? stopLabel + ' open' : 'Show ' + stopLabel);
@@ -1057,6 +1138,7 @@
 
     if (immediate || state.reducedMotion || typeof panel.animate !== 'function') {
       panel.hidden = !open;
+      if (!open) restoreWorkStopPanel(stop, panel);
       return;
     }
 
@@ -1079,6 +1161,7 @@
       panel.style.opacity = '';
       panel.style.transform = '';
       panel.hidden = !open;
+      if (!open) restoreWorkStopPanel(stop, panel);
       stop.classList.remove('is-animating');
     }).catch(function () {
       /* A newer stop request intentionally cancels this transition. */

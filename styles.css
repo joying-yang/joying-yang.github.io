@@ -1501,7 +1501,8 @@ body.reduce-motion .work-stop__trigger {
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--stop-accent) 18%, transparent));
 }
 
-.work-stop--apple .work-stop__heading img {
+.work-stop--apple .work-stop__heading img,
+.work-stop__panel--apple .work-stop__heading img {
   width: 31px;
   height: 36px;
   justify-self: center;
@@ -1589,6 +1590,10 @@ body.reduce-motion .work-stop__trigger {
   line-height: 1.48;
 }
 
+.work-stop-mobile-layer {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .work-timeline-stage {
     margin-top: 12px;
@@ -1621,8 +1626,38 @@ body.reduce-motion .work-stop__trigger {
     animation-duration: 13.2s;
   }
 
-  .work-stop__panel {
-    width: min(204px, calc(100vw - 42px));
+  .work-stop-mobile-layer:not([hidden]) {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    display: grid;
+    padding:
+      max(20px, env(safe-area-inset-top))
+      max(20px, env(safe-area-inset-right))
+      max(20px, env(safe-area-inset-bottom))
+      max(20px, env(safe-area-inset-left));
+    place-items: center;
+    pointer-events: none;
+  }
+
+  .work-stop-mobile-layer > .work-stop__panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: min(260px, 100%);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    margin: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .work-stop-mobile-layer > .work-stop__panel::before {
+    display: none;
   }
 }
 
