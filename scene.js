@@ -8,37 +8,46 @@
   var PANEL_MAX_ASPECT_RATIO = 2;
   var PANEL_SOURCE_HEIGHT = 700;
   var DEFAULT_PANEL_ASPECT_RATIO = 1.6;
+  var ACCENT_RGB = readAccentRgb();
   var DEFAULT_PANEL_WORLD_HEIGHT = 2 * FOCUSED_PANEL_DISTANCE * Math.tan((CAMERA_VERTICAL_FOV * Math.PI) / 360) * PANEL_VIEWPORT_HEIGHT_RATIO;
   var DEFAULT_PANEL_WORLD_WIDTH = DEFAULT_PANEL_WORLD_HEIGHT * DEFAULT_PANEL_ASPECT_RATIO;
 
+  function readAccentRgb() {
+    var raw = window.getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim();
+    var channels = raw.split(',').map(function (channel) { return Number(channel.trim()); });
+    if (channels.length !== 3 || channels.some(function (channel) { return !Number.isFinite(channel); })) {
+      return [199 / 255, 21 / 255, 133 / 255];
+    }
+    return channels.map(function (channel) { return Math.max(0, Math.min(255, channel)) / 255; });
+  }
+
   var STOPS = {
     entry: {
-      frame: [0, 0, 6],
       camera: [0, 0.4, 14],
       target: [-1.4, 0, 4],
     },
-    education: {
+    work: {
       frame: [0, 0, 0],
       yaw: 0,
       size: [DEFAULT_PANEL_WORLD_WIDTH, DEFAULT_PANEL_WORLD_HEIGHT],
       camera: [0, 0, 8.7],
       target: [0, 0, 0],
     },
-    work: {
+    projects: {
       frame: [5.6, -0.1, -6.8],
       yaw: -28,
       size: [DEFAULT_PANEL_WORLD_WIDTH, DEFAULT_PANEL_WORLD_HEIGHT],
       camera: [1.51559740376275, -0.1, 0.8816440578726645],
       target: [5.6, -0.1, -6.8],
     },
-    projects: {
+    skills: {
       frame: [-3.8, 0.25, -14.4],
       yaw: 24,
       size: [DEFAULT_PANEL_WORLD_WIDTH, DEFAULT_PANEL_WORLD_HEIGHT],
       camera: [-0.26139120524053894, 0.25, -6.452154518509373],
       target: [-3.8, 0.25, -14.4],
     },
-    skills: {
+    education: {
       frame: [2.8, -0.15, -22],
       yaw: -20,
       size: [DEFAULT_PANEL_WORLD_WIDTH, DEFAULT_PANEL_WORLD_HEIGHT],
@@ -47,7 +56,7 @@
     },
   };
 
-  var ORDER = ['education', 'work', 'projects', 'skills'];
+  var ORDER = ['work', 'projects', 'skills', 'education'];
 
   function createScene(canvas, callbacks) {
     callbacks = callbacks || {};
@@ -131,7 +140,7 @@
     var view = new Float32Array(16);
     var camera = STOPS.entry.camera.slice();
     var target = STOPS.entry.target.slice();
-    var active = 'education';
+    var active = ORDER[0];
     var routePosition = -0.72;
     var phase = 'gate';
     var reducedMotion = false;
@@ -215,9 +224,7 @@
         var raw = animation.duration <= 0 ? 1 : Math.min(1, elapsed / animation.duration);
         var canonicalRaw = animation.entry || !animation.reverse ? raw : 1 - raw;
         var canonicalProgress = softLinear(canonicalRaw, 0.14);
-        var progress = animation.reverse ? 1 - canonicalProgress : canonicalProgress;
         animation.raw = raw;
-        animation.progress = progress;
         routePosition = animation.entry
           ? mix(animation.fromRoute, animation.toRoute, canonicalProgress)
           : mix(animation.lowerRoute, animation.upperRoute, canonicalProgress);
@@ -230,9 +237,9 @@
 
         var forward;
         if (animation.entry) {
-          forward = interpolateDirection(animation.fromForward, animation.toForward, canonicalProgress, 1);
+          forward = interpolateDirection(animation.fromForward, animation.toForward, canonicalProgress);
         } else {
-          forward = interpolateDirection(animation.lowerForward, animation.upperForward, canonicalProgress, 1);
+          forward = interpolateDirection(animation.lowerForward, animation.upperForward, canonicalProgress);
         }
         target = add3(camera, scale3(forward, 7.6));
 
@@ -244,8 +251,8 @@
           active = animation.toId;
           animation = null;
           phase = 'idle';
-          draw();
           completion && completion();
+          draw();
           return;
         }
       }
@@ -267,53 +274,52 @@
       var gridAlpha = quality === 'mobile' ? 0.07 : mix(0.095, 0.155, travelLight);
       var railAlpha = quality === 'desktop' ? mix(0.1, 0.23, travelLight) : mix(0.06, 0.13, travelLight);
       var fragmentAlpha = quality === 'mobile' ? 0.035 : mix(0.09, 0.145, travelLight);
-      drawBuffer(geometry.grid, gl.LINES, [0.19, 0.42, 0.47, gridAlpha], 1);
-      drawBuffer(geometry.rails, gl.LINES, [0.31, 0.68, 0.76, railAlpha], 1);
-      drawBuffer(geometry.fragments, gl.LINES, [0.16, 0.35, 0.39, fragmentAlpha], 1);
+      drawBuffer(geometry.grid, gl.LINES, accentColor(gridAlpha), 1);
+      drawBuffer(geometry.rails, gl.LINES, accentColor(railAlpha), 1);
+      drawBuffer(geometry.fragments, gl.LINES, accentColor(fragmentAlpha), 1);
 
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      gl.depthMask(false);
-      ORDER.forEach(function (id, index) {
-        var emphasis = frameEmphasis(id, index);
-        if (quality === 'mobile' && emphasis < 0.34) return;
-        if (quality === 'tablet' && emphasis < 0.11) return;
-        var fillAlpha = phase === 'gate' ? 0.022 + emphasis * 0.1 : 0.08 + emphasis * 0.48;
-        drawBuffer(geometry.fills[id], gl.TRIANGLES, [0.008, 0.039, 0.051, fillAlpha], 1);
-      });
-      gl.depthMask(true);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      /* The entrance gallery uses solid spatial frames. Once browsing begins,
+         the DOM content keeps the same projected position without a rectangular
+         WebGL backing plane, so each section floats directly in cyberspace. */
+      if (phase === 'gate' || phase === 'entering') {
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.depthMask(false);
+        ORDER.forEach(function (id, index) {
+          var emphasis = frameEmphasis(id, index);
+          if (quality === 'mobile' && emphasis < 0.34) return;
+          if (quality === 'tablet' && emphasis < 0.11) return;
+          var fillAlpha = phase === 'gate' ? 0.022 + emphasis * 0.1 : 0.08 + emphasis * 0.48;
+          drawBuffer(geometry.fills[id], gl.TRIANGLES, [0.008, 0.039, 0.051, fillAlpha], 1);
+        });
+        gl.depthMask(true);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-      ORDER.forEach(function (id, index) {
-        var alpha = frameEmphasis(id, index);
-        if (quality === 'mobile' && alpha < 0.34) return;
-        if (quality === 'tablet' && alpha < 0.11) return;
+        ORDER.forEach(function (id, index) {
+          var alpha = frameEmphasis(id, index);
+          if (quality === 'mobile' && alpha < 0.34) return;
+          if (quality === 'tablet' && alpha < 0.11) return;
 
-        var color =   alpha > 0.52
-          ? [0.31, 0.68, 0.76, alpha]  // #4FADC2
-          : [0.19, 0.42, 0.47, alpha]; // #316B77
-
-
-        // var color = alpha > 0.52 ? [0.84, 0.42, 1, alpha] : [0.58, 0.28, 0.67, alpha];
-        drawBuffer(geometry.frames[id], gl.LINES, color, 1);
-        drawBuffer(geometry.motifs[id], gl.LINES, [0.25, 0.56, 0.64, alpha * 0.48], 1);
-      });
+          drawBuffer(geometry.frames[id], gl.LINES, accentColor(alpha), 1);
+          drawBuffer(geometry.motifs[id], gl.LINES, accentColor(alpha * 0.48), 1);
+        });
+      }
 
       if (quality !== 'mobile') {
-        var workProximity = proximityToRoute(1);
-        var projectProximity = proximityToRoute(2);
-        drawBuffer(geometry.workDepth, gl.LINES, [0.22, 0.5, 0.57, (quality === 'desktop' ? 0.2 : 0.12) * workProximity], 1);
-        drawBuffer(geometry.projectCorridor, gl.LINES, [0.36, 0.75, 0.83, (quality === 'desktop' ? 0.23 : 0.14) * projectProximity], 1);
+        var workProximity = proximityToRoute(ORDER.indexOf('work'));
+        var projectProximity = proximityToRoute(ORDER.indexOf('projects'));
+        drawBuffer(geometry.workDepth, gl.LINES, accentColor((quality === 'desktop' ? 0.2 : 0.12) * workProximity), 1);
+        drawBuffer(geometry.projectCorridor, gl.LINES, accentColor((quality === 'desktop' ? 0.23 : 0.14) * projectProximity), 1);
       }
 
       if (phase === 'gate' || phase === 'entering') {
         var portalAlpha = phase === 'gate' ? 0.72 : 0.38;
-        drawBuffer(geometry.portalOuter, gl.LINES, [0.31, 0.68, 0.76, portalAlpha], 1);
-        drawBuffer(geometry.portalInner, gl.LINES, [0.19, 0.42, 0.47], 1);
+        drawBuffer(geometry.portalOuter, gl.LINES, accentColor(portalAlpha), 1);
+        drawBuffer(geometry.portalInner, gl.LINES, accentColor(portalAlpha * 0.65), 1);
       }
 
       if (!reducedMotion && quality !== 'mobile') {
         var beaconAlpha = quality === 'desktop' ? mix(0.42, 0.56, travelLight) : mix(0.24, 0.34, travelLight);
-        drawBuffer(geometry.beacons, gl.POINTS, [0.31, 0.68, 1, beaconAlpha], quality === 'desktop' ? 2.2 : 1.6, quality === 'desktop' ? geometry.beacons.count : Math.min(120, geometry.beacons.count));
+        drawBuffer(geometry.beacons, gl.POINTS, accentColor(beaconAlpha), quality === 'desktop' ? 2.2 : 1.6, quality === 'desktop' ? geometry.beacons.count : Math.min(120, geometry.beacons.count));
       }
 
       emitProjection();
@@ -331,6 +337,10 @@
       gl.uniform4fv(location.color, color);
       gl.uniform1f(location.pointSize, pointSize || 1);
       gl.drawArrays(mode, 0, count || item.count);
+    }
+
+    function accentColor(alpha) {
+      return [ACCENT_RGB[0], ACCENT_RGB[1], ACCENT_RGB[2], alpha];
     }
 
     function updateBuffer(item, values) {
@@ -385,15 +395,12 @@
         callbacks.onProjection({
           phase: phase,
           raw: animation ? animation.raw : 1,
-          progress: animation ? animation.progress : 1,
           canonicalRaw: animation ? (animation.reverse ? 1 - animation.raw : animation.raw) : 1,
           from: animation ? animation.fromId : active,
           to: animation ? animation.toId : active,
           lower: animation ? animation.lowerId : active,
           upper: animation ? animation.upperId : active,
-          active: active,
           route: routePosition,
-          direction: animation ? animation.direction : 0,
           reverse: animation ? animation.reverse : false,
           quality: quality,
           width: width,
@@ -426,7 +433,6 @@
     function transitionTo(id, options) {
       options = options || {};
       if (!STOPS[id]) return;
-      var fromIndex = phase === 'gate' ? -1 : Math.max(0, ORDER.indexOf(active));
       var toIndex = Math.max(0, ORDER.indexOf(id));
       if (id === active && phase === 'idle') {
         options.onComplete && options.onComplete();
@@ -446,15 +452,12 @@
         startedAt: performance.now(),
         duration: reducedMotion ? 0 : Math.max(0, options.duration == null ? defaultDuration : options.duration),
         fromCamera: camera.slice(),
-        fromTarget: target.slice(),
         toCamera: STOPS[id].camera.slice(),
         toTarget: STOPS[id].target.slice(),
         fromForward: normalize3(subtract3(target, camera)),
         toForward: normalize3(subtract3(STOPS[id].target, STOPS[id].camera)),
         fromId: phase === 'entering' ? 'entry' : active,
         toId: id,
-        fromIndex: fromIndex,
-        toIndex: toIndex,
         fromRoute: fromRoute,
         toRoute: toIndex,
         lowerRoute: lowerRoute,
@@ -463,11 +466,9 @@
         upperId: upperId,
         lowerForward: lowerId ? normalize3(subtract3(STOPS[lowerId].target, STOPS[lowerId].camera)) : normalize3(subtract3(target, camera)),
         upperForward: upperId ? normalize3(subtract3(STOPS[upperId].target, STOPS[upperId].camera)) : normalize3(subtract3(STOPS[id].target, STOPS[id].camera)),
-        direction: direction,
         reverse: reverse,
         entry: Boolean(options.entry),
         raw: 0,
-        progress: 0,
         onComplete: options.onComplete,
       };
       requestRender();
@@ -481,7 +482,7 @@
       routePosition = Math.max(0, ORDER.indexOf(id));
       camera = STOPS[id].camera.slice();
       target = STOPS[id].target.slice();
-      requestRender();
+      draw();
     }
 
     function setReduced(value) {
@@ -494,8 +495,8 @@
         active = animation.toId;
         animation = null;
         phase = 'idle';
-        draw();
         completion && completion();
+        draw();
         return;
       }
       requestRender();
@@ -532,26 +533,14 @@
 
     return {
       enter: function (onComplete) {
-        transitionTo('education', { entry: true, duration: 1150, onComplete: onComplete });
+        transitionTo(ORDER[0], { entry: true, duration: 1150, onComplete: onComplete });
       },
       goTo: function (id, onComplete) {
         transitionTo(id, { onComplete: onComplete });
       },
       setActive: setActive,
       setReducedMotion: setReduced,
-      requestRender: requestRender,
-      getPose: function () {
-        return {
-          camera: camera.slice(),
-          target: target.slice(),
-          route: routePosition,
-          active: active,
-          phase: phase,
-          moving: Boolean(animation),
-        };
-      },
-      destroy: destroy,
-      stops: STOPS,
+      destroy: destroy
     };
   }
 
@@ -628,7 +617,7 @@
     var previousCeiling = null;
     for (var u = 0; u <= 3.001; u += 0.12) {
       var center = sampleRoute(u);
-      var tangent = routeDirection(u, 1);
+      var tangent = routeDirection(u);
       var side = normalize3([tangent[2], 0, -tangent[0]]);
       var floorPair = [
         [center[0] + side[0] * 1.75, -3.06, center[2] + side[2] * 1.75],
@@ -650,7 +639,7 @@
 
     for (var marker = 0; marker <= 3; marker += 0.5) {
       var markerCenter = sampleRoute(marker);
-      var markerTangent = routeDirection(marker, 1);
+      var markerTangent = routeDirection(marker);
       var markerSide = normalize3([markerTangent[2], 0, -markerTangent[0]]);
       [-1, 1].forEach(function (sideSign) {
         var x = markerCenter[0] + markerSide[0] * 3.65 * sideSign;
@@ -812,8 +801,8 @@
   function makeWorkDepth() {
     var list = [];
     [
-      [[4.25, -0.2, -8.7], -25, [4.1, 3.25]],
-      [[6.75, 0.05, -10.1], -31, [3.7, 3]],
+      [[-2.084, -0.1, -1.0438], 3, [4.1, 3.25]],
+      [[-0.5339, 0.15, -3.4536], -3, [3.7, 3]],
     ].forEach(function (item) {
       Array.prototype.push.apply(list, makeFrame(item[0], item[1], item[2]));
     });
@@ -823,9 +812,9 @@
   function makeProjectCorridor() {
     var list = [];
     [
-      [[-6.8, 0.05, -12.1], 30, [3.3, 4.2]],
-      [[-0.7, 0.12, -17], 17, [3.5, 4.4]],
-      [[1.35, -0.08, -19.4], 10, [3, 3.8]],
+      [[1.9406, -0.3, -7.748], -22, [3.3, 4.2]],
+      [[9.5574, -0.23, -5.9579], -35, [3.5, 4.4]],
+      [[12.7107, -0.43, -5.8201], -42, [3, 3.8]],
     ].forEach(function (item) {
       Array.prototype.push.apply(list, makeFrame(item[0], item[1], item[2]));
     });
@@ -872,7 +861,7 @@
     var points = ORDER.map(function (id) { return STOPS[id].camera; });
     var u = clamp(value, 0, points.length - 1);
     var index = Math.min(points.length - 2, Math.floor(u));
-    var amount = index === points.length - 1 ? 1 : u - index;
+    var amount = u - index;
     var p0 = points[Math.max(0, index - 1)];
     var p1 = points[index];
     var p2 = points[Math.min(points.length - 1, index + 1)];
@@ -891,12 +880,12 @@
     return result;
   }
 
-  function routeDirection(value, direction) {
+  function routeDirection(value) {
     var delta = 0.018;
     var before = sampleRoute(value - delta);
     var after = sampleRoute(value + delta);
     var tangent = normalize3(subtract3(after, before));
-    return scale3(tangent, direction < 0 ? -1 : 1);
+    return tangent;
   }
 
   function add3(a, b) {
@@ -916,13 +905,13 @@
     return [vector[0] / length, vector[1] / length, vector[2] / length];
   }
 
-  function interpolateDirection(from, to, amount, turnSign) {
+  function interpolateDirection(from, to, amount) {
     var start = normalize3(from);
     var end = normalize3(to);
     var startYaw = Math.atan2(start[0], start[2]);
     var endYaw = Math.atan2(end[0], end[2]);
     var yawDelta = Math.atan2(Math.sin(endYaw - startYaw), Math.cos(endYaw - startYaw));
-    if (Math.abs(Math.abs(yawDelta) - Math.PI) < 0.035) yawDelta = (turnSign < 0 ? -1 : 1) * Math.PI;
+    if (Math.abs(Math.abs(yawDelta) - Math.PI) < 0.035) yawDelta = Math.PI;
     var startPitch = Math.asin(clamp(start[1], -1, 1));
     var endPitch = Math.asin(clamp(end[1], -1, 1));
     var yaw = startYaw + yawDelta * amount;
@@ -1006,11 +995,6 @@
     return amount * amount * (3 - 2 * amount);
   }
 
-  function smootherstep(edgeA, edgeB, value) {
-    var amount = clamp((value - edgeA) / (edgeB - edgeA), 0, 1);
-    return amount * amount * amount * (amount * (amount * 6 - 15) + 10);
-  }
-
   function softLinear(value, edge) {
     var amount = clamp(value, 0, 1);
     var span = clamp(edge, 0.001, 0.49);
@@ -1028,7 +1012,6 @@
   }
 
   window.LiminalScene = {
-    create: createScene,
-    stops: STOPS,
+    create: createScene
   };
 })();

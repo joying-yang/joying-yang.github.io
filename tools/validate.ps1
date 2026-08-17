@@ -15,6 +15,17 @@ foreach ($file in $htmlFiles) {
     $errors += "Duplicate id '$($_.Name)' in $($file.FullName)"
   }
 
+  $idSet = @{}
+  $ids | ForEach-Object { $idSet[$_] = $true }
+  $ariaReferences = [regex]::Matches($html, '\b(?:aria-labelledby|aria-describedby|aria-controls)="([^"]+)"')
+  foreach ($match in $ariaReferences) {
+    foreach ($idReference in ($match.Groups[1].Value -split '\s+')) {
+      if ($idReference -and -not $idSet.ContainsKey($idReference)) {
+        $errors += "Missing ARIA target '#$idReference' in $($file.FullName)"
+      }
+    }
+  }
+
   $references = [regex]::Matches($html, '\b(?:href|src)="([^"]+)"') |
     ForEach-Object { $_.Groups[1].Value }
 
@@ -71,14 +82,6 @@ foreach ($xmlFile in @('sitemap.xml', 'assets\favicon.svg', 'assets\og-card.svg'
   }
 }
 
-$content = Get-Content -LiteralPath (Join-Path $root 'content.js') -Raw
-$slugs = [regex]::Matches($content, "slug: '([^']+)'") | ForEach-Object { $_.Groups[1].Value }
-foreach ($slug in $slugs) {
-  if (-not (Test-Path -LiteralPath (Join-Path $root "projects\$slug\index.html"))) {
-    $errors += "Missing standalone route for project '$slug'"
-  }
-}
-
 $index = Get-Content -LiteralPath (Join-Path $root 'index.html') -Raw
 if ($index -match '<script[^>]+src="scene\.js"') {
   $errors += 'scene.js must remain lazy-loaded so the semantic shell cannot be blocked by WebGL.'
@@ -89,4 +92,4 @@ if ($errors.Count) {
   exit 1
 }
 
-Write-Output "PASS: $($htmlFiles.Count) HTML routes; local references, fragments, IDs, data routes, JSON, and XML are valid."
+Write-Output "PASS: $($htmlFiles.Count) HTML routes; local references, fragments, IDs, ARIA targets, JSON, and XML are valid."

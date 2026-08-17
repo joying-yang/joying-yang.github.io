@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
-  <title id="title">Joy In — Creative Developer</title>
-  <desc id="description">A dark violet wireframe gallery with the words Joy In and Creative Developer.</desc>
+  <title id="title">Joying — Creative Developer</title>
+  <desc id="description">A dark wireframe gallery with the words Joying and Creative Developer.</desc>
   <defs>
     <radialGradient id="void" cx="60%" cy="58%" r="76%">
       <stop offset="0" stop-color="#17091d"/>
@@ -28,7 +28,7 @@
   <circle cx="600" cy="315" r="3" fill="#f3b7ff" filter="url(#glow)"/>
   <path d="M600 315v190" stroke="url(#fade)"/>
   <g font-family="ui-monospace,monospace">
-    <text x="73" y="116" fill="#d66bff" font-size="74" letter-spacing="-7">JOY/IN</text>
+    <text x="73" y="116" fill="#d66bff" font-size="74" letter-spacing="-7">JOYING</text>
     <text x="78" y="160" fill="#aaa56b" font-size="18" letter-spacing="4">CREATIVE DEVELOPER</text>
     <text x="78" y="205" fill="#8d8494" font-size="16" letter-spacing="2">DESIGNING CALM SYSTEMS</text>
     <text x="78" y="232" fill="#8d8494" font-size="16" letter-spacing="2">FOR CURIOUS HUMANS.</text>

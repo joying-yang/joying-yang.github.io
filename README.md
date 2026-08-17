@@ -1,49 +1,67 @@
-# Liminal portfolio
+# Joying portfolio
 
-A dependency-free, progressively enhanced portfolio based on the supplied implementation specification.
+A dependency-free portfolio with two presentations of the same content:
 
-For a beginner-friendly explanation of the complete repository, safe editing recipes, JavaScript state, CSS architecture, WebGL projection, testing, and deployment, read [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
+- Spatial mode projects the four sections into a small WebGL gallery.
+- 2D mode stacks those same section layouts into one scrollable page.
 
-## Run locally on macOS
+Both modes share the HTML in `index.html`; there is no framework, build step, or duplicated 2D page.
 
-The site has no package installation or build step. It only needs Python 3 for the local development tools:
+For a beginner-friendly explanation of the repository and safe editing recipes, read [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
+
+## Run locally on Windows
+
+From this repository in PowerShell:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\serve.ps1
+```
+
+Open <http://127.0.0.1:4173/>. Keep the PowerShell window open while viewing the site, and press `Ctrl+C` there to stop the server.
+
+To use another port:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\serve.ps1 -Port 4174
+```
+
+## Run locally on macOS or Linux
+
+Python 3 is the only requirement:
 
 ```sh
 ./tools/serve.sh
 ```
 
-Open <http://127.0.0.1:4173/> and stop the server with `Ctrl+C`. To use another port, run `./tools/serve.sh --port 4174`.
+Open <http://127.0.0.1:4173/> and press `Ctrl+C` to stop the server.
 
-Run the dependency-free structural and link checks before publishing:
+## Validate before publishing
+
+On Windows:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\validate.ps1
+```
+
+On macOS or Linux:
 
 ```sh
 ./tools/validate.sh
 ```
 
-The original PowerShell tools remain available for Windows users. The site can also be opened directly from the filesystem for a quick visual review, but clean project routes and History API behavior are most reliable over HTTP.
+Validation checks HTML routes, local links and assets, IDs, ARIA references, JSON, XML, and the lazy-loaded WebGL architecture.
 
-## GitHub Pages
+## Repository map
 
-This repository is a GitHub user site and is configured to publish at <https://joying-yang.github.io/>. The workflow in `.github/workflows/deploy-pages.yml` validates the site, copies only public site files into a deployment artifact, and deploys it whenever `main` changes.
+- `index.html` — all primary portfolio content and semantic structure
+- `styles.css` — shared presentation, responsive layouts, 2D stacking, and spatial panel styling
+- `script.js` — navigation, modes, history, accessibility, work beacons, and Skills tabs
+- `scene.js` — the dependency-free WebGL scene and camera route
+- `assets/` — images, logos, résumé, and social artwork
+- `projects/` — retained standalone case-study URLs
+- `tools/` — local servers and validation scripts
+- `.github/workflows/deploy-pages.yml` — GitHub Pages validation and deployment
 
-Before the first deployment, open the repository's **Settings → Pages** and set **Source** to **GitHub Actions**. You can then push to `main` or start the workflow manually from the Actions tab.
+## Deployment
 
-## Content handoff
-
-The current identity and portfolio records are polished seed content because the specification did not include owner data. Before launch, replace:
-
-- the identity, education, work, and skills copy in `index.html`;
-- project records in `content.js` and their matching standalone pages under `projects/`;
-- the reserved `hello@example.com` values with a confirmed public address;
-- geometric project artwork with optimized owned media if desired;
-- metadata and structured data with verified public information.
-
-Missing résumé, GitHub, and LinkedIn links are intentionally omitted instead of rendered as disabled or fake actions.
-
-## Implementation notes
-
-- All meaningful content is semantic HTML and remains usable without WebGL or JavaScript.
-- `scene.js` is a small raw-WebGL progressive layer with authored camera stops, shared line geometry, capped DPR, demand rendering, and context-loss fallback.
-- `script.js` coordinates the gate, URL fragments/history, focus, live announcements, keyboard/wheel/swipe input, explicit 2D mode, reduced motion, nested records, and route-backed project dialogs.
-- Project directories are real standalone routes for direct loads and crawling.
-- Local development, validation, and deployment use only browser-native code and the Python standard library; Node.js and a package manager are not required.
+The GitHub Actions workflow validates the repository, stages only public files, validates the staged copy, and deploys it to GitHub Pages. In the repository settings, set Pages → Source to **GitHub Actions**, then push to `main` or run the workflow manually.

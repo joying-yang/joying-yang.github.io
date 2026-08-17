@@ -7,6 +7,7 @@ import json
 import re
 import sys
 import xml.etree.ElementTree as element_tree
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -14,6 +15,42 @@ from urllib.parse import unquote
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 IGNORED_DIRECTORIES = {".git", ".tmp", "_site", "__pycache__"}
 EXTERNAL_REFERENCE = re.compile(r"^(?:[a-z][a-z0-9+.-]*:|//)", re.IGNORECASE)
+VOID_ELEMENTS = {
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+    "meta", "param", "source", "track", "wbr",
+}
+
+
+class StructureParser(HTMLParser):
+    """Track explicit HTML nesting so stray or missing closing tags fail CI."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.errors = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag not in VOID_ELEMENTS:
+            self.stack.append((tag, self.getpos()[0]))
+
+    def handle_endtag(self, tag):
+        if tag in VOID_ELEMENTS:
+            return
+        if not self.stack:
+            self.errors.append("unexpected </{}> on line {}".format(tag, self.getpos()[0]))
+            return
+        open_tag, open_line = self.stack.pop()
+        if open_tag != tag:
+            self.errors.append(
+                "</{}> on line {} closes <{}> from line {}".format(
+                    tag, self.getpos()[0], open_tag, open_line
+                )
+            )
+
+    def close(self):
+        super().close()
+        for tag, line in reversed(self.stack):
+            self.errors.append("unclosed <{}> from line {}".format(tag, line))
 
 
 def parse_arguments():
@@ -87,6 +124,24 @@ def validate_html(root, errors):
         for identifier in sorted(duplicates):
             errors.append("Duplicate id '{}' in {}".format(identifier, source_file))
 
+        parser = StructureParser()
+        parser.feed(markup)
+        parser.close()
+        for structure_error in parser.errors:
+            errors.append("Invalid HTML structure in {}: {}".format(source_file, structure_error))
+
+        identifier_set = set(identifiers)
+        id_references = re.findall(
+            r'\b(?:aria-labelledby|aria-describedby|aria-controls)="([^"]+)"',
+            markup,
+        )
+        for reference_group in id_references:
+            for identifier in reference_group.split():
+                if identifier not in identifier_set:
+                    errors.append(
+                        "Missing ARIA target '#{}' in {}".format(identifier, source_file)
+                    )
+
         references = re.findall(r'\b(?:href|src)="([^"]+)"', markup)
         for reference in references:
             if not reference.strip() or EXTERNAL_REFERENCE.match(reference):
@@ -141,21 +196,6 @@ def validate_xml(root, errors):
             errors.append("Invalid XML in {}: {}".format(relative_path, error))
 
 
-def validate_project_routes(root, errors):
-    content_path = root / "content.js"
-    try:
-        content = content_path.read_text(encoding="utf-8")
-    except OSError as error:
-        errors.append("Cannot read content.js: {}".format(error))
-        return
-
-    slugs = re.findall(r"slug: '([^']+)'", content)
-    for slug in slugs:
-        route = root / "projects" / slug / "index.html"
-        if not route.is_file():
-            errors.append("Missing standalone route for project '{}'".format(slug))
-
-
 def validate_architecture(root, errors):
     index_path = root / "index.html"
     try:
@@ -189,7 +229,6 @@ def main():
     html_files = validate_html(root, errors)
     validate_json(root, errors)
     validate_xml(root, errors)
-    validate_project_routes(root, errors)
     validate_architecture(root, errors)
 
     if errors:
@@ -199,7 +238,7 @@ def main():
         return 1
 
     print(
-        "PASS: {} HTML routes; local references, fragments, IDs, project routes, JSON, and XML are valid.".format(
+        "PASS: {} HTML routes; structure, local references, fragments, IDs, ARIA targets, JSON, and XML are valid.".format(
             len(html_files)
         )
     )

@@ -1,7 +1,8 @@
 (function () {
   'use strict';
 
-  var SECTIONS = ['education', 'work', 'projects', 'skills'];
+  var SECTIONS = ['work', 'projects', 'skills', 'education'];
+  var SITE_NAME = 'Joying';
   var LABELS = {
     education: 'Education',
     work: 'Work',
@@ -23,9 +24,6 @@
   var previousButton = document.getElementById('previous-section');
   var nextButton = document.getElementById('next-section');
   var levelNumber = document.getElementById('level-number');
-  var dialog = document.getElementById('project-dialog');
-  var dialogContent = document.getElementById('dialog-content');
-  var dialogClose = document.getElementById('dialog-close');
   var sectionElements = Array.prototype.slice.call(document.querySelectorAll('[data-section]'));
   var sectionLinks = Array.prototype.slice.call(document.querySelectorAll('[data-section-link]'));
   var rootUrl = new URL('./', window.location.href);
@@ -41,21 +39,15 @@
 
   var state = {
     entered: false,
-    active: initialHash || 'education',
-    settled: initialHash || 'education',
-    displayed: initialHash || 'education',
+    active: initialHash || SECTIONS[0],
+    settled: initialHash || SECTIONS[0],
+    displayed: initialHash || SECTIONS[0],
     mode: queryMode === '2d' || storedMode === '2d' ? '2d' : '3d',
     reducedMotion: storedMotion === 'reduced' || (storedMotion !== 'full' && motionMedia.matches),
     phase: 'gate',
     transitionId: 0,
-    sceneReady: false,
     sceneRetryNeeded: false,
-    selectedEducationPage: 0,
-    selectedProjectPage: 0,
     selectedSkillPage: 0,
-    selectedSkillNode: null,
-    returnFocus: null,
-    dialogClosePending: false,
   };
 
   var sceneController = null;
@@ -67,6 +59,9 @@
   var wheelCooldownUntil = 0;
   var touchStart = null;
   var sectionObserver = null;
+  var twoDGeometryFrame = 0;
+  var linearNavigationTarget = null;
+  var linearNavigationTimer = 0;
   var spatialProjectionActive = false;
   var spatialSizeKey = '';
   var spatialSizes = {};
@@ -82,18 +77,18 @@
     setMode(state.mode, false, true);
     bindEvents();
     startClock();
-    updateNestedContent();
+    updateSkillPages(true);
 
     window.requestAnimationFrame(function () {
-      if (state.mode === '3d') {
-        loadScene(function (loaded) {
-          if (loaded && state.mode === '3d') ensureScene();
-        });
-      }
+      loadScene(function (loaded) {
+        if (!loaded) return;
+        var controller = ensureScene();
+        if (controller && state.entered) controller.setActive(state.active);
+      });
     });
 
     if (initialHash || queryMode === '2d') {
-      revealExperience({ immediate: true, focus: false });
+      revealExperience({ focus: false });
     } else {
       updateInterface(false);
     }
@@ -104,7 +99,7 @@
     enterButton.addEventListener('click', enterGallery);
     skip2dButton.addEventListener('click', function () {
       setMode('2d', true);
-      revealExperience({ immediate: true, focus: true });
+      revealExperience({ focus: true });
     });
 
     var skipLink = document.querySelector('.skip-link');
@@ -112,14 +107,14 @@
       if (!state.entered) {
         event.preventDefault();
         setMode('2d', true);
-        revealExperience({ immediate: true, focus: true });
+        revealExperience({ focus: true });
       }
     });
 
     sectionLinks.forEach(function (link) {
       link.addEventListener('click', function (event) {
         event.preventDefault();
-        if (!state.entered) revealExperience({ immediate: true, focus: false });
+        if (!state.entered) revealExperience({ focus: false });
         goToSection(link.dataset.sectionLink, 'navigation', true);
       });
     });
@@ -144,72 +139,10 @@
     experience.addEventListener('touchend', handleTouchEnd, { passive: true });
     experience.addEventListener('touchcancel', function () { touchStart = null; }, { passive: true });
     window.addEventListener('popstate', handleHistory);
-
-    document.querySelectorAll('[data-education-page-action]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        cycleEducationPage(button.dataset.educationPageAction === 'next' ? 1 : -1, false);
-      });
-      button.addEventListener('keydown', function (event) {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-          event.preventDefault();
-          event.stopPropagation();
-          cycleEducationPage(event.key === 'ArrowDown' ? 1 : -1, false);
-        }
-      });
-    });
-
-    var educationPageStage = document.getElementById('education-page-stage');
-    educationPageStage.tabIndex = state.mode === '3d' ? 0 : -1;
-    educationPageStage.setAttribute('aria-label', 'Education pages. Use up and down arrows to change page.');
-    educationPageStage.addEventListener('keydown', function (event) {
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        event.preventDefault();
-        event.stopPropagation();
-        cycleEducationPage(event.key === 'ArrowDown' ? 1 : -1, false);
-      }
-    });
+    window.addEventListener('resize', queue2dPanelGeometry, { passive: true });
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', queue2dPanelGeometry, { passive: true });
 
     bindWorkStops();
-
-    document.querySelectorAll('[data-project-action]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        cycleProjectPage(button.dataset.projectAction === 'next' ? 1 : -1, false);
-      });
-      button.addEventListener('keydown', function (event) {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-          event.preventDefault();
-          event.stopPropagation();
-          cycleProjectPage(event.key === 'ArrowDown' ? 1 : -1, false);
-        }
-      });
-    });
-
-    var projectStage = document.getElementById('project-stage');
-    var hasMultipleProjectPages = document.querySelectorAll('[data-project-page-index]').length > 1;
-    projectStage.tabIndex = state.mode === '3d' && hasMultipleProjectPages ? 0 : -1;
-    projectStage.setAttribute('aria-label', hasMultipleProjectPages ? 'Project pages. Use up and down arrows to change page.' : 'Selected project cards.');
-    projectStage.addEventListener('keydown', function (event) {
-      if (event.target !== projectStage) return;
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        event.preventDefault();
-        event.stopPropagation();
-        cycleProjectPage(event.key === 'ArrowDown' ? 1 : -1, false);
-      }
-    });
-    bindProjectCards();
-
-    document.querySelectorAll('[data-skill-page-action]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        cycleSkillPage(button.dataset.skillPageAction === 'next' ? 1 : -1, false);
-      });
-      button.addEventListener('keydown', function (event) {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-          event.preventDefault();
-          event.stopPropagation();
-          cycleSkillPage(event.key === 'ArrowDown' ? 1 : -1, false);
-        }
-      });
-    });
 
     document.querySelectorAll('[data-skill-page-select]').forEach(function (button) {
       button.disabled = false;
@@ -218,12 +151,10 @@
       });
     });
 
-    bindSkillControls();
-
     var skillPageStage = document.getElementById('skill-page-stage');
     if (skillPageStage) {
       var hasMultipleSkillPages = document.querySelectorAll('[data-skill-page-index]').length > 1;
-      skillPageStage.tabIndex = state.mode === '3d' && hasMultipleSkillPages ? 0 : -1;
+      skillPageStage.tabIndex = hasMultipleSkillPages ? 0 : -1;
       skillPageStage.setAttribute('aria-label', hasMultipleSkillPages ? 'Skills pages. Use up and down arrows to change page.' : 'Technology skills.');
       if (hasMultipleSkillPages) {
         skillPageStage.addEventListener('keydown', function (event) {
@@ -236,24 +167,6 @@
         });
       }
     }
-
-    document.querySelectorAll('[data-open-project]').forEach(function (link) {
-      link.addEventListener('click', function (event) {
-        if (!dialog || typeof dialog.showModal !== 'function') return;
-        if (!window.PORTFOLIO_PROJECTS || !window.PORTFOLIO_PROJECTS[link.dataset.openProject]) return;
-        event.preventDefault();
-        openProject(link.dataset.openProject, link, true);
-      });
-    });
-
-    dialogClose.addEventListener('click', requestDialogClose);
-    dialog.addEventListener('cancel', function (event) {
-      event.preventDefault();
-      requestDialogClose();
-    });
-    dialog.addEventListener('click', function (event) {
-      if (event.target === dialog) requestDialogClose();
-    });
 
     if (motionMedia.addEventListener) {
       motionMedia.addEventListener('change', function (event) {
@@ -269,7 +182,6 @@
     if (!window.LiminalScene) {
       loadScene();
       if (sceneLoadState === 'failed') sceneAttempted = true;
-      state.sceneReady = false;
       return null;
     }
     sceneAttempted = true;
@@ -277,17 +189,14 @@
 
     sceneController = window.LiminalScene.create(canvas, {
       onReady: function () {
-        state.sceneReady = true;
         state.sceneRetryNeeded = false;
         capabilityNote.innerHTML = '<span aria-hidden="true">SYS</span> Spatial layer ready';
         updateInterface(false);
       },
       onError: function () {
-        state.sceneReady = false;
         capabilityNote.innerHTML = '<span aria-hidden="true">SYS</span> 2D presentation ready';
       },
       onLost: function () {
-        state.sceneReady = false;
         state.sceneRetryNeeded = true;
         try { sceneController && sceneController.destroy(); } catch (error) { /* The lost context is already inert. */ }
         sceneController = null;
@@ -440,7 +349,7 @@
     viewTitle.hidden = false;
     state.settled = state.active;
     showSection(state.active);
-    if (state.mode === '3d' && sceneController) sceneController.setActive(state.active);
+    if (sceneController) sceneController.setActive(state.active);
     updateInterface(true);
     setSectionUrl(state.active, false);
     positionInitial2dSection();
@@ -452,18 +361,20 @@
     if (SECTIONS.indexOf(id) === -1) return;
     if (!state.entered) {
       state.active = id;
-      revealExperience({ immediate: true, focus: false });
+      revealExperience({ focus: false });
     }
 
     if (state.mode === '2d') {
       state.active = id;
       state.settled = id;
       body.dataset.active = id;
+      if (sceneController) sceneController.setActive(id);
+      beginLinearNavigation(id, state.reducedMotion);
       updateInterface(true);
       if (pushHistory) setSectionUrl(id, true);
       var section = document.getElementById(id);
-      section.scrollIntoView({ behavior: state.reducedMotion ? 'auto' : 'smooth', block: 'start' });
-      if (source !== 'scroll') window.setTimeout(function () { focusSection(id); }, state.reducedMotion ? 0 : 260);
+      scrollToLinearSection(section, state.reducedMotion ? 'instant' : 'smooth');
+      window.setTimeout(function () { focusSection(id); }, state.reducedMotion ? 0 : 260);
       announce(sectionAnnouncement(id));
       return;
     }
@@ -472,6 +383,26 @@
 
     if (id === state.settled && state.phase === 'idle') {
       if (source === 'navigation' || source === 'button') focusSection(id);
+      return;
+    }
+
+    /* Reduced motion is a true state change, not a zero-duration animation.
+       Commit the panel and camera together so navigation never waits on a
+       scene frame that may be throttled or skipped. */
+    if (state.reducedMotion) {
+      state.transitionId += 1;
+      state.phase = 'idle';
+      state.active = id;
+      state.settled = id;
+      body.dataset.active = id;
+      body.classList.remove('is-transitioning');
+      main.inert = false;
+      showSection(id);
+      if (sceneController) sceneController.setActive(id);
+      if (pushHistory) setSectionUrl(id, true);
+      updateInterface(true);
+      focusSection(id);
+      announce(sectionAnnouncement(id));
       return;
     }
 
@@ -510,7 +441,7 @@
       var isActive = section.dataset.section === id;
       if (state.mode === '2d') {
         section.hidden = false;
-        section.classList.toggle('is-active', isActive);
+        section.classList.add('is-active');
         section.inert = false;
         section.removeAttribute('aria-hidden');
       } else if (spatialShells) {
@@ -566,8 +497,6 @@
     var isGateVista = payload.phase === 'gate' && body.dataset.state === 'gate';
     var travelPhase = isGateVista ? 'vista' : !isTraveling ? 'idle' : raw < 0.22 ? 'depart' : raw < 0.66 ? 'traverse' : 'approach';
     body.dataset.travelPhase = travelPhase;
-    if (isTraveling) body.dataset.travelDirection = payload.reverse ? 'backward' : 'forward';
-    else delete body.dataset.travelDirection;
 
     var swapPoint = payload.reverse ? 0.16 : 0.84;
     if (payload.phase === 'transitioning' && state.phase === 'transitioning' && payload.to === state.active && raw >= swapPoint && state.displayed !== payload.to) {
@@ -655,7 +584,6 @@
     spatialSizes = {};
     body.classList.remove('has-scene-projection');
     delete body.dataset.travelPhase;
-    delete body.dataset.travelDirection;
     sectionElements.forEach(function (section) {
       section.style.removeProperty('transform');
       section.style.removeProperty('left');
@@ -778,8 +706,8 @@
     previousButton.disabled = state.phase === 'transitioning' || index === 0;
     nextButton.disabled = state.phase === 'transitioning' || index === SECTIONS.length - 1;
     body.dataset.active = state.active;
-    viewTitle.textContent = LABELS[state.active] + ' — Joy In';
-    if (updateDocumentTitle) document.title = LABELS[state.active] + ' — Joy In';
+    viewTitle.textContent = LABELS[state.active] + ' — ' + SITE_NAME;
+    if (updateDocumentTitle) document.title = LABELS[state.active] + ' — ' + SITE_NAME;
 
     var modeLabel = modeToggle.querySelector('span:last-child');
     modeLabel.textContent = state.mode === '3d' ? 'Use 2D mode' : state.sceneRetryNeeded ? 'Retry spatial mode' : 'Use spatial mode';
@@ -812,22 +740,15 @@
     }
 
     if (mode === '2d') clearSceneProjection();
+    else endLinearNavigation();
     state.mode = mode;
     body.dataset.mode = mode;
-    updateEducationPages(true);
-    updateProjectPages(true);
+    sync2dPanelGeometry();
     updateSkillPages(true);
-    var educationPageStage = document.getElementById('education-page-stage');
-    if (educationPageStage) educationPageStage.tabIndex = mode === '3d' ? 0 : -1;
-    var projectStage = document.getElementById('project-stage');
-    if (projectStage) {
-      var hasMultipleProjectPages = document.querySelectorAll('[data-project-page-index]').length > 1;
-      projectStage.tabIndex = mode === '3d' && hasMultipleProjectPages ? 0 : -1;
-    }
     var skillPageStage = document.getElementById('skill-page-stage');
     if (skillPageStage) {
       var hasMultipleSkillPages = document.querySelectorAll('[data-skill-page-index]').length > 1;
-      skillPageStage.tabIndex = mode === '3d' && hasMultipleSkillPages ? 0 : -1;
+      skillPageStage.tabIndex = hasMultipleSkillPages ? 0 : -1;
     }
     if (explicit) writePreference('liminal-mode', mode);
     if (state.entered) {
@@ -839,7 +760,7 @@
         main.inert = false;
       }
       showSection(state.active);
-      if (mode === '3d' && sceneController) sceneController.setActive(state.active);
+      if (sceneController) sceneController.setActive(state.active);
     }
     updateInterface(false);
     if (state.entered && mode === '2d') positionInitial2dSection();
@@ -880,14 +801,78 @@
         .sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; });
       if (!visible.length) return;
       var id = visible[0].target.dataset.section;
+      if (linearNavigationTarget) {
+        if (id !== linearNavigationTarget) return;
+        endLinearNavigation();
+      }
       if (id === state.active || SECTIONS.indexOf(id) === -1) return;
       state.active = id;
       state.settled = id;
+      if (sceneController) sceneController.setActive(id);
       updateInterface(true);
       setSectionUrl(id, false);
     }, { rootMargin: '-18% 0px -55% 0px', threshold: [0.08, 0.25, 0.5] });
 
     sectionElements.forEach(function (section) { sectionObserver.observe(section); });
+  }
+
+  function queue2dPanelGeometry() {
+    if (twoDGeometryFrame) return;
+    twoDGeometryFrame = window.requestAnimationFrame(function () {
+      twoDGeometryFrame = 0;
+      sync2dPanelGeometry();
+      if (state.mode === '2d') setup2dObserver();
+    });
+  }
+
+  function beginLinearNavigation(id, immediate) {
+    linearNavigationTarget = id;
+    window.clearTimeout(linearNavigationTimer);
+    linearNavigationTimer = window.setTimeout(endLinearNavigation, immediate ? 0 : 1000);
+  }
+
+  function endLinearNavigation() {
+    linearNavigationTarget = null;
+    window.clearTimeout(linearNavigationTimer);
+    linearNavigationTimer = 0;
+  }
+
+  /* Spatial mode lays content out on a 700px-tall logical canvas, then zooms
+     that canvas into a front-facing plane occupying 75% of the viewport.
+     Linear mode uses the same source canvas and scale; only the outer panels
+     are stacked vertically instead of being projected into the 3D scene. */
+  function sync2dPanelGeometry() {
+    var forcedColors = window.matchMedia && window.matchMedia('(forced-colors: active)').matches;
+    var useLogicalPanel = state.mode === '2d' && window.innerWidth >= 768 && !forcedColors;
+    body.classList.toggle('has-2d-panel-layout', useLogicalPanel);
+
+    if (!useLogicalPanel) {
+      body.style.removeProperty('--linear-panel-width');
+      body.style.removeProperty('--linear-panel-height');
+      body.style.removeProperty('--linear-panel-source-width');
+      body.style.removeProperty('--linear-panel-source-height');
+      body.style.removeProperty('--linear-panel-scale');
+      body.style.removeProperty('--linear-panel-edge-space');
+      body.style.removeProperty('--linear-panel-gap');
+      return;
+    }
+
+    var viewportWidth = Math.max(1, Math.round(window.innerWidth));
+    var viewportHeight = Math.max(1, Math.round(window.innerHeight));
+    var targetHeight = viewportHeight * 0.75;
+    var targetWidth = Math.min(viewportWidth * 0.75, targetHeight * 2);
+    var sourceHeight = 700;
+    var sourceWidth = sourceHeight * targetWidth / targetHeight;
+    var scale = targetHeight / sourceHeight;
+    var edgeSpace = (viewportHeight - targetHeight) / 2;
+
+    body.style.setProperty('--linear-panel-width', targetWidth + 'px');
+    body.style.setProperty('--linear-panel-height', targetHeight + 'px');
+    body.style.setProperty('--linear-panel-source-width', sourceWidth + 'px');
+    body.style.setProperty('--linear-panel-source-height', sourceHeight + 'px');
+    body.style.setProperty('--linear-panel-scale', scale.toFixed(6));
+    body.style.setProperty('--linear-panel-edge-space', edgeSpace + 'px');
+    body.style.setProperty('--linear-panel-gap', (viewportHeight - targetHeight) + 'px');
   }
 
   function positionInitial2dSection() {
@@ -897,14 +882,21 @@
     }
     window.requestAnimationFrame(function () {
       var target = document.getElementById(state.active);
-      if (target && state.active !== 'education') target.scrollIntoView({ behavior: 'auto', block: 'start' });
+      if (target && state.active !== SECTIONS[0]) scrollToLinearSection(target, 'instant');
       window.requestAnimationFrame(setup2dObserver);
     });
   }
 
+  function scrollToLinearSection(section, behavior) {
+    if (!section) return;
+    var styles = window.getComputedStyle(section);
+    var viewportOffset = parseFloat(styles.scrollMarginTop) || 0;
+    var documentTop = window.scrollY + section.getBoundingClientRect().top;
+    window.scrollTo({ top: Math.max(0, documentTop - viewportOffset), behavior: behavior });
+  }
+
   function handleGlobalKeydown(event) {
-    if (!state.entered || state.phase === 'project' || isEditable(event.target)) return;
-    if (state.mode !== '3d') return;
+    if (!state.entered || isEditable(event.target)) return;
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
       stepSection(-1, 'keyboard');
@@ -921,7 +913,7 @@
   }
 
   function handleWheel(event) {
-    if (!state.entered || state.mode !== '3d' || state.phase !== 'idle' || dialog.open) return;
+    if (!state.entered || state.mode !== '3d' || state.phase !== 'idle') return;
     if (event.ctrlKey) return;
     if (Date.now() < wheelCooldownUntil || panelCanScroll(event.target, event.deltaY)) return;
     var delta = event.deltaY;
@@ -941,7 +933,7 @@
   }
 
   function handleTouchStart(event) {
-    if (!state.entered || state.mode !== '3d' || state.phase !== 'idle' || dialog.open) return;
+    if (!state.entered || state.mode !== '3d' || state.phase !== 'idle') return;
     if (event.touches.length !== 1) {
       touchStart = null;
       return;
@@ -971,46 +963,11 @@
     return false;
   }
 
-  function cycleEducationPage(direction, silent) {
-    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-education-page-index]'));
-    if (!pages.length) return;
-    var previousPage = state.selectedEducationPage;
-    state.selectedEducationPage = Math.max(0, Math.min(pages.length - 1, state.selectedEducationPage + direction));
-    updateEducationPages(silent || previousPage === state.selectedEducationPage);
-  }
-
-  function updateEducationPages(silent) {
-    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-education-page-index]'));
-    if (!pages.length) return;
-    state.selectedEducationPage = Math.max(0, Math.min(pages.length - 1, state.selectedEducationPage));
-    var expanded = state.mode === '2d';
-
-    pages.forEach(function (page, index) {
-      var selected = index === state.selectedEducationPage;
-      page.hidden = !expanded && !selected;
-      page.inert = !expanded && !selected;
-      page.classList.toggle('is-selected', selected);
-    });
-
-    var counter = document.getElementById('education-page-count');
-    if (counter) counter.textContent = pad(state.selectedEducationPage + 1) + ' / ' + pad(pages.length);
-    var previousButton = document.querySelector('[data-education-page-action="previous"]');
-    var nextButton = document.querySelector('[data-education-page-action="next"]');
-    if (previousButton) previousButton.disabled = state.selectedEducationPage === 0;
-    if (nextButton) nextButton.disabled = state.selectedEducationPage === pages.length - 1;
-
-    if (!silent) {
-      var selectedPage = pages[state.selectedEducationPage];
-      announce((selectedPage.dataset.pageLabel || 'Education page') + ', page ' + (state.selectedEducationPage + 1) + ' of ' + pages.length);
-    }
-  }
-
   function cycleSkillPage(direction, silent) {
     var pages = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-index]'));
     if (!pages.length) return;
     var previousPage = state.selectedSkillPage;
     state.selectedSkillPage = Math.max(0, Math.min(pages.length - 1, state.selectedSkillPage + direction));
-    if (previousPage !== state.selectedSkillPage) state.selectedSkillNode = null;
     updateSkillPages(silent || previousPage === state.selectedSkillPage);
   }
 
@@ -1019,115 +976,28 @@
     if (!pages.length || !isFinite(index)) return;
     var previousPage = state.selectedSkillPage;
     state.selectedSkillPage = Math.max(0, Math.min(pages.length - 1, index));
-    if (previousPage !== state.selectedSkillPage) state.selectedSkillNode = null;
     updateSkillPages(silent || previousPage === state.selectedSkillPage);
-  }
-
-  function bindSkillControls() {
-    document.querySelectorAll('[data-skill-control]').forEach(function (control) {
-      control.addEventListener('click', function () {
-        if (state.mode !== '3d') return;
-        var item = control.closest('[data-skill-node]');
-        if (!item) return;
-        var page = control.closest('[data-skill-page-index]');
-        var node = item.dataset.skillNode;
-        var selected = state.selectedSkillNode === node;
-        var name = control.querySelector('.skill-item__copy strong');
-        var type = control.querySelector('.skill-item__copy small');
-        var detail = control.querySelector('.skill-item__detail');
-        if (page) state.selectedSkillPage = parseInt(page.dataset.skillPageIndex, 10) || 0;
-        state.selectedSkillNode = selected ? null : node;
-        updateSkillPages(true);
-        if (selected) {
-          announce((name ? name.textContent : node) + ' deselected. Showing ' + (page && page.dataset.pageLabel ? page.dataset.pageLabel : 'skills') + ' layer summary.');
-          return;
-        }
-        announce((name ? name.textContent : node) + (type ? ', ' + type.textContent : '') + '. ' + (detail ? detail.textContent : ''));
-      });
-      control.addEventListener('keydown', function (event) {
-        if (state.mode !== '3d') return;
-        if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
-          event.preventDefault();
-          if (!event.repeat) control.click();
-        }
-      });
-    });
-  }
-
-  function updateSkillInspector(control) {
-    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-index]'));
-    var page = pages[state.selectedSkillPage] || pages[0];
-    var type = document.getElementById('skill-inspector-type');
-    var code = document.getElementById('skill-inspector-code');
-    var title = document.getElementById('skill-inspector-title');
-    var copy = document.getElementById('skill-inspector-copy');
-    if (!type || !code || !title || !copy || !page) return;
-
-    if (control) {
-      var item = control.closest('[data-skill-node]');
-      var name = control.querySelector('.skill-item__copy strong');
-      var category = control.querySelector('.skill-item__copy small');
-      var detail = control.querySelector('.skill-item__detail');
-      type.textContent = category ? category.textContent : 'Technology';
-      code.textContent = item ? item.dataset.skillNode.replace(/-/g, '_').toUpperCase() : 'NODE';
-      title.textContent = name ? name.textContent : 'Technology node';
-      copy.textContent = detail ? detail.textContent : 'Selected capability.';
-      return;
-    }
-
-    type.textContent = 'Active layer';
-    code.textContent = pad(state.selectedSkillPage + 1) + ' / ' + pad(pages.length);
-    title.textContent = page.dataset.pageLabel || 'Technology skills';
-    copy.textContent = page.dataset.pageSummary || 'Select a technology node to inspect it.';
   }
 
   function updateSkillPages(silent) {
     var pages = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-index]'));
     if (!pages.length) return;
     state.selectedSkillPage = Math.max(0, Math.min(pages.length - 1, state.selectedSkillPage));
-    var expanded = state.mode === '2d';
-
     pages.forEach(function (page, index) {
       var selected = index === state.selectedSkillPage;
-      page.hidden = !expanded && !selected;
-      page.inert = !expanded && !selected;
+      page.hidden = !selected;
+      page.inert = !selected;
       page.classList.toggle('is-selected', selected);
-    });
-
-    document.querySelectorAll('[data-skill-control]').forEach(function (control) {
-      if (expanded) {
-        control.removeAttribute('role');
-        control.removeAttribute('tabindex');
-        control.removeAttribute('aria-pressed');
-        return;
-      }
-      var item = control.closest('[data-skill-node]');
-      control.setAttribute('role', 'button');
-      control.tabIndex = 0;
-      control.setAttribute('aria-pressed', String(Boolean(item && item.dataset.skillNode === state.selectedSkillNode)));
     });
 
     var counter = document.getElementById('skill-page-count');
     if (counter) counter.textContent = pad(state.selectedSkillPage + 1) + ' / ' + pad(pages.length);
-    var previousButton = document.querySelector('[data-skill-page-action="previous"]');
-    var nextButton = document.querySelector('[data-skill-page-action="next"]');
-    var controls = document.querySelector('.skill-page-controls');
     var pageSelectors = Array.prototype.slice.call(document.querySelectorAll('[data-skill-page-select]'));
-    if (controls) controls.hidden = pages.length < 2;
-    if (previousButton) previousButton.disabled = state.selectedSkillPage === 0;
-    if (nextButton) nextButton.disabled = state.selectedSkillPage === pages.length - 1;
     pageSelectors.forEach(function (button) {
       var selected = parseInt(button.dataset.skillPageSelect, 10) === state.selectedSkillPage;
       button.disabled = false;
       button.setAttribute('aria-pressed', String(selected));
     });
-
-    var selectedControl = null;
-    if (state.selectedSkillNode) {
-      var selectedItem = document.querySelector('[data-skill-node="' + state.selectedSkillNode + '"]');
-      selectedControl = selectedItem && selectedItem.querySelector('[data-skill-control]');
-    }
-    updateSkillInspector(selectedControl);
 
     if (!silent) {
       var selectedPage = pages[state.selectedSkillPage];
@@ -1146,9 +1016,7 @@
       if (!trigger) return;
       setWorkStop(stop, false, true);
       trigger.addEventListener('click', function () {
-        var willOpen = !stop._workStopTarget;
-        if (willOpen) closeWorkStops(stop, false);
-        setWorkStop(stop, willOpen, false);
+        if (!stop._workStopTarget) setWorkStop(stop, true, false);
       });
       if (closeButton) {
         closeButton.addEventListener('click', function () {
@@ -1158,27 +1026,6 @@
       }
     });
 
-    timeline.addEventListener('keydown', function (event) {
-      if (event.key !== 'Escape') return;
-      var openStop = stops.filter(function (stop) { return stop._workStopTarget; })[0];
-      if (!openStop) return;
-      event.preventDefault();
-      event.stopPropagation();
-      var trigger = openStop.querySelector('[data-work-stop-trigger]');
-      setWorkStop(openStop, false, false);
-      if (trigger) trigger.focus({ preventScroll: true });
-    });
-
-    document.addEventListener('pointerdown', function (event) {
-      if (event.target.closest && event.target.closest('[data-work-stop]')) return;
-      closeWorkStops(null, false);
-    });
-  }
-
-  function closeWorkStops(except, immediate) {
-    document.querySelectorAll('[data-work-stop]').forEach(function (stop) {
-      if (stop !== except && stop._workStopTarget) setWorkStop(stop, false, immediate);
-    });
   }
 
   function setWorkStop(stop, open, immediate) {
@@ -1195,7 +1042,7 @@
     stop.classList.remove('is-animating');
     trigger.setAttribute('aria-expanded', String(open));
     var stopLabel = stop.dataset.workLabel || ((stop.dataset.workCompany || 'work') + ' experience details');
-    trigger.setAttribute('aria-label', (open ? 'Hide ' : 'Show ') + stopLabel);
+    trigger.setAttribute('aria-label', open ? stopLabel + ' open' : 'Show ' + stopLabel);
 
     if (open) {
       panel.hidden = false;
@@ -1210,7 +1057,6 @@
 
     if (immediate || state.reducedMotion || typeof panel.animate !== 'function') {
       panel.hidden = !open;
-      stop._workStopOpen = open;
       return;
     }
 
@@ -1233,251 +1079,19 @@
       panel.style.opacity = '';
       panel.style.transform = '';
       panel.hidden = !open;
-      stop._workStopOpen = open;
       stop.classList.remove('is-animating');
     }).catch(function () {
       /* A newer stop request intentionally cancels this transition. */
     });
   }
 
-  function cycleProjectPage(direction, silent) {
-    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-project-page-index]'));
-    if (!pages.length) return;
-    var previousPage = state.selectedProjectPage;
-    state.selectedProjectPage = Math.max(0, Math.min(pages.length - 1, state.selectedProjectPage + direction));
-    updateProjectPages(silent || previousPage === state.selectedProjectPage);
-  }
-
-  /* Project cards use two short half-turns instead of leaving either face
-     permanently transformed. The surface therefore settles at transform:none,
-     which keeps browser-rendered text as sharp as the rest of the interface. */
-  function bindProjectCards() {
-    var hoverMedia = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : { matches: false };
-    var cards = Array.prototype.slice.call(document.querySelectorAll('[data-project-card]'));
-
-    cards.forEach(function (card) {
-      var toggle = card.querySelector('[data-project-flip]');
-      var back = card.querySelector('.project-card__face--back');
-      if (!toggle || !back) return;
-
-      card._projectPointerInside = false;
-      requestProjectCardFace(card, false, true);
-
-      card.addEventListener('pointerenter', function () {
-        if (!hoverMedia.matches) return;
-        card._projectPointerInside = true;
-        requestProjectCardFace(card, true, false);
-      });
-
-      card.addEventListener('pointerleave', function () {
-        if (!hoverMedia.matches) return;
-        card._projectPointerInside = false;
-        if (!card.contains(document.activeElement)) requestProjectCardFace(card, false, false);
-      });
-
-      card.addEventListener('focusin', function (event) {
-        if (back.contains(event.target)) requestProjectCardFace(card, true, false);
-      });
-
-      card.addEventListener('focusout', function (event) {
-        if (event.relatedTarget && card.contains(event.relatedTarget)) return;
-        if (!card._projectPointerInside) requestProjectCardFace(card, false, false);
-      });
-
-      card.addEventListener('keydown', function (event) {
-        if (event.key !== 'Escape' || !card._projectTargetFlipped) return;
-        event.preventDefault();
-        event.stopPropagation();
-        toggle.focus();
-        requestProjectCardFace(card, false, false);
-      });
-
-      toggle.addEventListener('click', function () {
-        requestProjectCardFace(card, !card._projectTargetFlipped, false);
-      });
-    });
-  }
-
-  function setProjectCardFace(card, flipped) {
-    var front = card.querySelector('.project-card__face--front');
-    var back = card.querySelector('.project-card__face--back');
-    var toggle = card.querySelector('[data-project-flip]');
-    var toggleCopy = card.querySelector('[data-project-flip-copy]');
-    var title = card.dataset.projectTitle || 'project';
-    if (!front || !back || !toggle) return;
-
-    card._projectFlipped = flipped;
-    card.classList.toggle('is-flipped', flipped);
-    front.hidden = flipped;
-    front.inert = flipped;
-    front.setAttribute('aria-hidden', String(flipped));
-    back.hidden = !flipped;
-    back.inert = !flipped;
-    back.setAttribute('aria-hidden', String(!flipped));
-    toggle.setAttribute('aria-expanded', String(flipped));
-    toggle.setAttribute('aria-label', (flipped ? 'Show project overview for ' : 'Show technical details for ') + title);
-    if (toggleCopy) toggleCopy.textContent = flipped ? 'Front' : 'Details';
-  }
-
-  function requestProjectCardFace(card, flipped, immediate) {
-    var surface = card.querySelector('.project-card__surface');
-    if (!surface) return;
-
-    var token = (card._projectFlipToken || 0) + 1;
-    card._projectFlipToken = token;
-    card._projectTargetFlipped = flipped;
-    surface.getAnimations().forEach(function (animation) { animation.cancel(); });
-    surface.style.transform = '';
-    surface.style.opacity = '';
-    card.classList.remove('is-flipping');
-
-    if (immediate || state.reducedMotion || typeof surface.animate !== 'function' || card._projectFlipped === flipped) {
-      setProjectCardFace(card, flipped);
-      return;
-    }
-
-    var direction = flipped ? 1 : -1;
-    card.classList.add('is-flipping');
-    var outgoing = surface.animate([
-      { transform: 'rotateY(0deg)', opacity: 1 },
-      { transform: 'rotateY(' + (90 * direction) + 'deg)', opacity: 0.68 },
-    ], {
-      duration: 170,
-      easing: 'cubic-bezier(.55, .05, .72, .46)',
-      fill: 'both',
-    });
-
-    outgoing.finished.then(function () {
-      if (card._projectFlipToken !== token) return null;
-      setProjectCardFace(card, flipped);
-      var incoming = surface.animate([
-        { transform: 'rotateY(' + (-90 * direction) + 'deg)', opacity: 0.68 },
-        { transform: 'rotateY(0deg)', opacity: 1 },
-      ], {
-        duration: 210,
-        easing: 'cubic-bezier(.18, .72, .22, 1)',
-        fill: 'both',
-      });
-      outgoing.cancel();
-      return incoming.finished;
-    }).then(function () {
-      if (card._projectFlipToken !== token) return;
-      surface.getAnimations().forEach(function (animation) { animation.cancel(); });
-      surface.style.transform = '';
-      surface.style.opacity = '';
-      card.classList.remove('is-flipping');
-    }).catch(function () {
-      /* A newer pointer or keyboard request intentionally cancels this turn. */
-    });
-  }
-
-  function updateProjectPages(silent) {
-    var pages = Array.prototype.slice.call(document.querySelectorAll('[data-project-page-index]'));
-    if (!pages.length) return;
-    state.selectedProjectPage = Math.max(0, Math.min(pages.length - 1, state.selectedProjectPage));
-    var expanded = state.mode === '2d';
-    pages.forEach(function (page, index) {
-      var selected = index === state.selectedProjectPage;
-      page.hidden = expanded ? false : !selected;
-      page.inert = !expanded && !selected;
-      page.classList.toggle('is-selected', selected);
-      if (!expanded && !selected) {
-        page.querySelectorAll('[data-project-card]').forEach(function (card) {
-          requestProjectCardFace(card, false, true);
-        });
-      }
-    });
-    document.getElementById('project-index').textContent = pad(state.selectedProjectPage + 1) + ' / ' + pad(pages.length);
-    var previousButton = document.querySelector('[data-project-action="previous"]');
-    var nextButton = document.querySelector('[data-project-action="next"]');
-    if (previousButton) previousButton.disabled = state.selectedProjectPage === 0;
-    if (nextButton) nextButton.disabled = state.selectedProjectPage === pages.length - 1;
-    if (!silent) {
-      var selectedPage = pages[state.selectedProjectPage];
-      announce((selectedPage.dataset.pageLabel || 'Projects') + ', page ' + (state.selectedProjectPage + 1) + ' of ' + pages.length);
-    }
-  }
-
-  function updateNestedContent() {
-    updateEducationPages(true);
-    updateSkillPages(true);
-    updateProjectPages(true);
-  }
-
-  function openProject(slug, trigger, pushHistory) {
-    var project = window.PORTFOLIO_PROJECTS && window.PORTFOLIO_PROJECTS[slug];
-    if (!project) return;
-    state.phase = 'project';
-    state.dialogClosePending = false;
-    state.returnFocus = trigger || state.returnFocus;
-    dialogContent.innerHTML = renderCaseStudy(project, false);
-    if (!dialog.open) dialog.showModal();
-    document.title = project.title + ' — Joy In';
-    if (pushHistory) {
-      var projectUrl = new URL('projects/' + project.slug + '/', rootUrl);
-      try {
-        window.history.pushState({ project: project.slug, section: state.active }, '', projectUrl.href);
-      } catch (error) {
-        window.location.href = new URL('projects/' + project.slug + '/index.html', rootUrl).href;
-      }
-    }
-    window.setTimeout(function () { dialogClose.focus(); }, 0);
-  }
-
-  function requestDialogClose() {
-    if (state.dialogClosePending) return;
-    if (window.history.state && window.history.state.project) {
-      state.dialogClosePending = true;
-      window.history.back();
-    } else {
-      closeProject();
-    }
-  }
-
-  function closeProject() {
-    if (dialog.open) dialog.close();
-    state.phase = 'idle';
-    state.dialogClosePending = false;
-    dialogContent.innerHTML = '';
-    document.title = LABELS[state.active] + ' — Joy In';
-    var target = state.returnFocus;
-    state.returnFocus = null;
-    if (target && document.contains(target)) window.setTimeout(function () { target.focus(); }, 0);
-  }
-
-  function renderCaseStudy(project, standalone) {
-    var heading = standalone ? 'h1' : 'h2';
-    return [
-      '<article class="case-study">',
-      '<p class="panel-index"><span>', escapeHtml(project.year), ' / CASE STUDY</span><span>SELECTED WORK</span></p>',
-      '<', heading, standalone ? '' : ' id="dialog-title"', '>', escapeHtml(project.title), '</', heading, '>',
-      '<div class="case-meta"><span>', escapeHtml(project.role), '</span><span>', project.tech.map(escapeHtml).join(' · '), '</span></div>',
-      '<p class="case-intro">', escapeHtml(project.summary), '</p>',
-      '<div class="case-grid">',
-      '<section><h3>Context</h3><p>', escapeHtml(project.context), '</p></section>',
-      '<section><h3>Constraints</h3><ul>', project.constraints.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join(''), '</ul></section>',
-      '<section><h3>Role</h3><p>', escapeHtml(project.role), '</p></section>',
-      '<section><h3>Key decisions</h3><ul>', project.decisions.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join(''), '</ul></section>',
-      '<section><h3>Process</h3><p>', escapeHtml(project.process), '</p></section>',
-      '</div>',
-      '<div class="case-result"><span>Result</span><p>', escapeHtml(project.result), '</p></div>',
-      '</article>',
-    ].join('');
-  }
-
   function handleHistory() {
-    var slugMatch = window.location.pathname.match(/\/projects\/([^/]+)\/?$/);
-    if (slugMatch && window.PORTFOLIO_PROJECTS[decodeURIComponent(slugMatch[1])]) {
-      if (!dialog.open) openProject(decodeURIComponent(slugMatch[1]), state.returnFocus, false);
-      return;
-    }
-    if (dialog.open) closeProject();
     var historyMode = new URL(window.location.href).searchParams.get('mode') === '2d' ? '2d' : '3d';
     if (historyMode !== state.mode) setMode(historyMode, false);
-    var section = parseSection(window.location.hash) || 'education';
+    var section = parseSection(window.location.hash) || SECTIONS[0];
     if (!state.entered) {
       state.active = section;
-      revealExperience({ immediate: true, focus: false });
+      revealExperience({ focus: false });
     } else if (section !== state.active) {
       goToSection(section, 'history', false);
     }
@@ -1485,12 +1099,9 @@
 
   function focusSection(id) {
     var heading = document.querySelector('#' + id + ' h2');
-    if (heading && heading.classList.contains('sr-only') && id === 'projects' && state.mode === '3d') {
-      heading = document.querySelector('#' + id + ' .project-page.is-selected .project-card h3') || heading;
-    }
     if (!heading) return;
     try {
-      heading.focus({ preventScroll: state.mode === '3d' });
+      heading.focus({ preventScroll: true });
     } catch (error) {
       heading.focus();
     }
@@ -1549,15 +1160,6 @@
     if (!target) return false;
     var name = target.tagName && target.tagName.toLowerCase();
     return name === 'input' || name === 'textarea' || name === 'select' || target.isContentEditable;
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
   }
 
   function clamp(value, minimum, maximum) {
