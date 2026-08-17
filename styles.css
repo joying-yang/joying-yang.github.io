@@ -2986,6 +2986,15 @@ body.has-2d-panel-layout[data-mode="2d"] .panel-scroll {
     padding: 7px;
   }
 
+  #mode-toggle span:last-child {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: nowrap;
+  }
+
   .section-nav {
     position: fixed;
     z-index: 8;
@@ -3189,8 +3198,10 @@ body.has-2d-panel-layout[data-mode="2d"] .panel-scroll {
   body[data-mode="2d"] .panel-scroll {
     width: 100%;
     height: 100%;
+    overscroll-behavior-y: auto;
     transform: none;
     zoom: 1;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
