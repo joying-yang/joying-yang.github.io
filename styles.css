@@ -1124,6 +1124,11 @@ body.has-2d-panel-layout[data-mode="2d"] #education .education-page .tag-region 
   margin-top: 10px;
 }
 
+body.has-scene-projection[data-mode="3d"] #education .education-page .tag-region--coursework,
+body.has-2d-panel-layout[data-mode="2d"] #education .education-page .tag-region--coursework {
+  margin-top: 28px;
+}
+
 body.has-scene-projection[data-mode="3d"] #education .education-page .tags,
 body.has-2d-panel-layout[data-mode="2d"] #education .education-page .tags {
   gap: 5px;
@@ -3087,6 +3092,11 @@ body.has-2d-panel-layout[data-mode="2d"] .panel-scroll {
     margin-top: 18px;
   }
 
+  body.has-scene-projection[data-mode="3d"] #education .education-page .tag-region--coursework,
+  body.has-2d-panel-layout[data-mode="2d"] #education .education-page .tag-region--coursework {
+    margin-top: 23px;
+  }
+
   #skills .skill-overview {
     gap: 6px;
     padding-bottom: 7px;
@@ -3263,6 +3273,11 @@ body.has-2d-panel-layout[data-mode="2d"] .panel-scroll {
   body.has-2d-panel-layout[data-mode="2d"] #education .education-page .tag-region {
     padding-top: 4px;
     margin-top: 6px;
+  }
+
+  body.has-scene-projection[data-mode="3d"] #education .education-page .tag-region--coursework,
+  body.has-2d-panel-layout[data-mode="2d"] #education .education-page .tag-region--coursework {
+    margin-top: 26px;
   }
 
   body.has-scene-projection[data-mode="3d"] #education .education-page .tags,
